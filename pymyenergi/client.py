@@ -4,6 +4,8 @@ from .zappi import Zappi
 from .eddi import Eddi
 
 DEVICE_TYPES = ['eddi', 'zappi', 'harvi']
+
+
 class MyEnergiClient:
     """Zappi Client for MyEnergi API."""
 
@@ -12,16 +14,16 @@ class MyEnergiClient:
         connection: Connection,
     ) -> None:
         self._connection = connection
-        self.devices = None
+        self.devices = {'eddi': [], 'zappi': [], 'harvi': []}
+        self._inited = False
 
     async def _initDevices(self):
-        if self.devices is None:
-            self.devices = {}
-            data = await self.getStatus()
+        if not self._inited:
+            data = await self.refresh()
+            self._inited = True
             for grp in data:
                 key = list(grp.keys())[0]
                 devices = grp[key]
-                self.devices[key] = []
                 for device in devices:
                     if key == 'eddi':
                         self.devices[key].append(Eddi(self._connection, device['sno'], device))
@@ -30,7 +32,7 @@ class MyEnergiClient:
                     elif key == 'harvi':
                         self.devices[key].append(Harvi(self._connection, device['sno'], device))
 
-    async def getStatus(self):
+    async def refresh(self):
         data = await self._connection.get("/cgi-jstatus-*")
         return data
 

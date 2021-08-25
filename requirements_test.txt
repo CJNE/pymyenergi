@@ -1,0 +1,4 @@
+-r requirements_dev.txt
+pytest
+pytest-httpx
+
