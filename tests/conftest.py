@@ -1,8 +1,8 @@
 """Global fixtures"""
+import json
 from unittest.mock import patch
 
 import pytest
-import json
 
 
 def load_fixture_json(name):
@@ -19,21 +19,28 @@ def bypass_client_refresh_fixture():
     with patch("pymyenergi.client.MyEnergiClient.refresh"):
         yield
 
+
 @pytest.fixture(name="error_on_client_refresh")
 def error_client_refresh_fixture():
     """Simulate error when retrieving data from API."""
     with patch("pymyenergi.client.MyEnergiClient.refresh", side_effect=Exception):
         yield
 
+
 @pytest.fixture(name="client_refresh_fixture")
 def client_refresh_fixture():
     """Mock data from client.refresh()"""
-    with patch("pymyenergi.client.MyEnergiClient.refresh", return_value=load_fixture_json('client')):
+    with patch(
+        "pymyenergi.client.MyEnergiClient.refresh",
+        return_value=load_fixture_json("client"),
+    ):
         yield
+
 
 @pytest.fixture(name="zappi_get_data_fixture")
 def zappi_get_data_fixture():
     """Mock data from client.refresh()"""
-    with patch("pymyenergi.zappi.Zappi.getData", return_value=load_fixture_json('zappi')):
+    with patch(
+        "pymyenergi.zappi.Zappi.getData", return_value=load_fixture_json("zappi")
+    ):
         yield
-

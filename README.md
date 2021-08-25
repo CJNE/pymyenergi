@@ -1,13 +1,15 @@
 # pymyenergi
+
 An async python library for MyEnergi API
 
 This is a very early release, things are changing rapidly so use at your own risk!
 
-*NOTE:* This work is not officially supported by MyEnergi and functionality can stop working at any time without warning
+_NOTE:_ This work is not officially supported by MyEnergi and functionality can stop working at any time without warning
 
 ## Installation
 
 The easiest method is to install using pip3/pip (venv is also a good idea)
+
 ```
 pip install pymyenergi
 ```
@@ -20,12 +22,12 @@ pip install pymyenergi -U
 
 Setup will add a cli under the name myenergicli, see below for usage
 
-
 ## CLI usage
 
 A simple cli is provided with this library.
 
-If no username or password is supplied as input arguments you will be prompted. 
+If no username or password is supplied as input arguments you will be prompted.
+
 ```
 usage: cli.py [-h] [-u USERNAME] [-p PASSWORD] [-k KIND] [-d] {list}
 
@@ -46,8 +48,8 @@ optional arguments:
 
 Install pymyenergi using pip (requires python > 3.6)
 
-
 ### Example client usage
+
 ```
 import asyncio
 from pymyenergi.connection import Connection
@@ -76,6 +78,7 @@ loop.run_until_complete(zappis())
 ```
 
 ### Example client usage - Zappi
+
 ```
 import asyncio
 from pymyenergi.connection import Connection
@@ -127,4 +130,5 @@ loop.run_until_complete(get_data())
 ```
 
 ## Credits
+
 [twonk](https://github.com/twonk/MyEnergi-App-Api) for documenting the unofficial API

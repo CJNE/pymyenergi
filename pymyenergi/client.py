@@ -1,9 +1,10 @@
 from pymyenergi.connection import Connection
+
+from .eddi import Eddi
 from .harvi import Harvi
 from .zappi import Zappi
-from .eddi import Eddi
 
-DEVICE_TYPES = ['eddi', 'zappi', 'harvi']
+DEVICE_TYPES = ["eddi", "zappi", "harvi"]
 
 
 class MyEnergiClient:
@@ -14,7 +15,7 @@ class MyEnergiClient:
         connection: Connection,
     ) -> None:
         self._connection = connection
-        self.devices = {'eddi': [], 'zappi': [], 'harvi': []}
+        self.devices = {"eddi": [], "zappi": [], "harvi": []}
         self._inited = False
 
     async def _initDevices(self):
@@ -25,20 +26,26 @@ class MyEnergiClient:
                 key = list(grp.keys())[0]
                 devices = grp[key]
                 for device in devices:
-                    if key == 'eddi':
-                        self.devices[key].append(Eddi(self._connection, device['sno'], device))
-                    elif key == 'zappi':
-                        self.devices[key].append(Zappi(self._connection, device['sno'], device))
-                    elif key == 'harvi':
-                        self.devices[key].append(Harvi(self._connection, device['sno'], device))
+                    if key == "eddi":
+                        self.devices[key].append(
+                            Eddi(self._connection, device["sno"], device)
+                        )
+                    elif key == "zappi":
+                        self.devices[key].append(
+                            Zappi(self._connection, device["sno"], device)
+                        )
+                    elif key == "harvi":
+                        self.devices[key].append(
+                            Harvi(self._connection, device["sno"], device)
+                        )
 
     async def refresh(self):
         data = await self._connection.get("/cgi-jstatus-*")
         return data
 
-    async def getDevices(self, kind='all'):
+    async def getDevices(self, kind="all"):
         await self._initDevices()
-        if(kind == 'all'):
+        if kind == "all":
             ret = []
             for k in DEVICE_TYPES:
                 devices = self.devices.get(k, [])

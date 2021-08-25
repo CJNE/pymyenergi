@@ -1,14 +1,12 @@
 import argparse
 import asyncio
-from pymyenergi.connection import Connection
-from pymyenergi.client import MyEnergiClient
-from pymyenergi.zappi import Zappi
-from pymyenergi.eddi import Eddi
-from pymyenergi.exceptions import WrongCredentials
-import sys
 import logging
-import json
+import sys
 from getpass import getpass
+
+from pymyenergi.client import MyEnergiClient
+from pymyenergi.connection import Connection
+from pymyenergi.exceptions import WrongCredentials
 
 logging.basicConfig()
 logging.root.setLevel(logging.WARNING)
@@ -33,12 +31,12 @@ async def main(args):
 
 
 def cli():
-    parser = argparse.ArgumentParser(description='MyEnergi CLI.')
-    parser.add_argument('command', choices=['list'])
-    parser.add_argument('-u', '--username', dest='username', default=None)
-    parser.add_argument('-p', '--password', dest='password', default=None)
-    parser.add_argument('-k', '--kind', dest='kind', default='all')
-    parser.add_argument('-d', '--debug', dest='debug', action='store_true')
+    parser = argparse.ArgumentParser(description="MyEnergi CLI.")
+    parser.add_argument("command", choices=["list"])
+    parser.add_argument("-u", "--username", dest="username", default=None)
+    parser.add_argument("-p", "--password", dest="password", default=None)
+    parser.add_argument("-k", "--kind", dest="kind", default="all")
+    parser.add_argument("-d", "--debug", dest="debug", action="store_true")
 
     args = parser.parse_args()
 

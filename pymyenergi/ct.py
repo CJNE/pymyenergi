@@ -1,9 +1,5 @@
 class CT:
-    def __init__(
-            self,
-            name,
-            value
-    ) -> None:
+    def __init__(self, name, value) -> None:
         self._name = name
         self._value = value
 
@@ -16,4 +12,3 @@ class CT:
     def power(self):
         """Power reading of CT clamp in W"""
         return self._value
-

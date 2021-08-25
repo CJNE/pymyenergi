@@ -4,12 +4,7 @@ from pymyenergi.connection import Connection
 class Harvi:
     """Zappi Client for MyEnergi API."""
 
-    def __init__(
-        self,
-        connection: Connection,
-        serialno,
-        data={}
-    ) -> None:
+    def __init__(self, connection: Connection, serialno, data={}) -> None:
         self._connection = connection
         self._serialno = serialno
         self._data = data

@@ -1,8 +1,9 @@
 import asyncio
-from pymyenergi.connection import Connection
-from pymyenergi.client import MyEnergiClient
-from sys import argv
 import logging
+from sys import argv
+
+from pymyenergi.client import MyEnergiClient
+from pymyenergi.connection import Connection
 
 logging.basicConfig()
 logging.root.setLevel(logging.INFO)
@@ -15,12 +16,12 @@ async def zappis() -> None:
     conn = Connection(user, password)
     client = MyEnergiClient(conn)
 
-    zappis = await client.getDevices('zappi')
+    zappis = await client.getDevices("zappi")
     for zappi in zappis:
         print(f"Zappi {zappi.serial_number} charge mode {zappi.charge_mode}")
 
     await conn.close()
 
+
 loop = asyncio.get_event_loop()
 loop.run_until_complete(zappis())
-
