@@ -21,7 +21,7 @@ class Connection:
         self,
         username: Text = None,
         password: Text = None,
-        timeout: int = 10
+        timeout: int = 5
     ) -> None:
         """Initialize connection object."""
         self.timeout = timeout
@@ -30,7 +30,8 @@ class Connection:
         self.username = username
         self.password = password
         self.auth = httpx.DigestAuth(self.username, self.password)
-        self._httpclient = httpx.AsyncClient()
+        self.headers = {'User-Agent': 'Wget/1.14 (linux-gnu)'}
+        self._httpclient = httpx.AsyncClient(auth=self.auth, headers=self.headers, timeout=self.timeout)
         _LOGGER.debug("New connection created")
 
     def _checkMyEnergiServerURL(self, responseHeader):
@@ -40,78 +41,45 @@ class Connection:
         else:
             _LOGGER.debug('MyEnergi ASN not found in Myenergi header')
 
-    async def _createhead(self):
-        headers = {'User-Agent': 'Wget/1.14 (linux-gnu)'}
-        _LOGGER.debug('Create headers')
+    async def send(self, method, url, json=None):
+        # If base URL has not been set, make a request to director to fetch it
         if self.base_url is None:
             _LOGGER.debug('Get MyEnergi base url from director')
             try:
-                url = self.director_url + '/cgi-jstatus-E'
-                response = await self._httpclient.get(url,
-                                                      headers=headers,
-                                                      auth=self.auth,
-                                                      timeout=self.timeout)
+                directorUrl = self.director_url + '/cgi-jstatus-E'
+                response = await self._httpclient.get(directorUrl)
             except:
                 _LOGGER.error("Myenergi server request problem")
                 _LOGGER.debug(sys.exc_info()[0])
             else:
                 self._checkMyEnergiServerURL(response.headers)
-        return headers
+        theUrl = self.base_url + url
+        try:
+            _LOGGER.debug(f"{method} {url} {theUrl}")
+            response = await self._httpclient.request(method, theUrl, json=json)
+        except httpx.ReadTimeout:
+            raise Exception("Read timeout")
+        else:
+            _LOGGER.debug(f"GET status {response.status_code}")
+            if (response.status_code == 200):
+                return response.json()
+            elif (response.status_code == 401):
+                raise WrongCredentials()
+            raise MyEnergiException(response.status_code)
+
 
     async def get(self, url):
-        headers = await self._createhead()
-        theUrl = self.base_url + url
-        _LOGGER.debug(f"GET {url} {theUrl}")
-        response = await self._httpclient.get(theUrl,
-                                              headers=headers,
-                                              auth=self.auth,
-                                              timeout=self.timeout)
-        _LOGGER.debug(f"GET status {response.status_code}")
-        if (response.status_code == 200):
-            return response.json()
-        raise MyEnergiException(response.status_code)
+        return await self.send('GET', url)
 
     async def post(self, url, data=None):
-        headers = await self._createhead()
-        theUrl = self.base_url + url
-        _LOGGER.debug(f"POST {url} {theUrl}")
-        response = await self._httpclient.post(theUrl,
-                                               headers=headers,
-                                               data=data,
-                                               auth=self.auth,
-                                               timeout=self.timeout)
-        _LOGGER.debug(f"POST status {response.status_code}")
-        if (response.status_code == 200):
-            return response.json()
-        raise MyEnergiException(response.status_code)
+        return await self.send('POST', url, data)
 
     async def put(self, url, data=None):
-        headers = await self._createhead()
-        theUrl = self.base_url + url
-        _LOGGER.debug(f"PUT {url} {theUrl}")
-        response = await self._httpclient.put(theUrl,
-                                              headers=headers,
-                                              data=data,
-                                              auth=self.auth,
-                                              timeout=self.timeout)
-        _LOGGER.debug(f"PUT status {response.status_code}")
-        if (response.status_code == 200):
-            return response.json()
-        raise MyEnergiException(response.status_code)
+        return await self.send('PUT', url, data)
 
     async def delete(self, url, data=None):
-        headers = await self._createhead()
-        theUrl = self.base_url + url
-        _LOGGER.debug(f"DELETE {url} {theUrl}")
-        response = await self.httpsclient.delete(theUrl,
-                                                 headers=headers,
-                                                 data=data,
-                                                 auth=self.auth,
-                                                 timeout=self.timeout)
-        _LOGGER.debug(f"DELETE status {response.status_code}")
-        if (response.status_code == 200):
-            return response.json()
-        raise MyEnergiException(response.status_code)
+        return await self.send('DELETE', url, data)
 
     async def close(self):
+        _LOGGER.debug("Closing MyEnergi http client connection")
         await self._httpclient.aclose()

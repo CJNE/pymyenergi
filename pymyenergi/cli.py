@@ -28,7 +28,7 @@ async def main(args):
             # print(json.dumps(devices, indent=2))
     except WrongCredentials:
         sys.exit("Wrong username or password")
-    else:
+    finally:
         await conn.close()
 
 
