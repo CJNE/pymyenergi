@@ -11,7 +11,7 @@ class Harvi(BaseDevice):
 
     @property
     def kind(self):
-        return "eddi"
+        return "harvi"
 
     async def getData(self):
         response = await self._connection.get(f"/cgi-jstatus-H{self._serialno}")

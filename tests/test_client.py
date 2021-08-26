@@ -13,10 +13,7 @@ conn = {}
 async def test_init(bypass_client_get_data):
     client = MyEnergiClient(conn)
     await client.refresh()
-    assert len(client.devices) == 3
-    assert len(client.devices["zappi"]) == 0
-    assert len(client.devices["eddi"]) == 0
-    assert len(client.devices["harvi"]) == 0
+    assert len(client.devices) == 0
 
 
 async def test_init_error(error_on_client_get_data):
