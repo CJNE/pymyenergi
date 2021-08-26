@@ -1,2 +1,6 @@
 -r requirements_dev.txt
+pytest-sugar==0.9.4
+pytest-timeout==1.4.2
 pytest-httpx
+pytest-xdist==2.2.1
+pytest==6.2.4
