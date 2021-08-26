@@ -1,25 +1,19 @@
 from pymyenergi.connection import Connection
 
+from .base_device import BaseDevice
 
-class Harvi:
+
+class Harvi(BaseDevice):
     """Zappi Client for MyEnergi API."""
 
     def __init__(self, connection: Connection, serialno, data={}) -> None:
-        self._connection = connection
-        self._serialno = serialno
-        self._data = data
+        super().__init__(connection, serialno, data)
 
-    async def refresh(self):
-        self._data = await self._connection.get(f"/cgi-jstatus-H{self._serialno}")
-        return self._data
+    @property
+    def kind(self):
+        return "eddi"
 
-    async def getData(self, refresh=False):
-        if refresh:
-            await self.refresh()
-        return self._data
-
-    def __str__(self):
-        return f"Harvi S/N: {self._serialno}"
-
-    def __repr__(self):
-        return self.__str__()
+    async def getData(self):
+        response = await self._connection.get(f"/cgi-jstatus-H{self._serialno}")
+        data = response["harvi"][0]
+        return data

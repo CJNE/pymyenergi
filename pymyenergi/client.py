@@ -7,6 +7,17 @@ from .zappi import Zappi
 DEVICE_TYPES = ["eddi", "zappi", "harvi"]
 
 
+def device_factory(conn, kind, serial):
+    """Create device instances"""
+    if kind == "zappi":
+        return Zappi(conn, serial)
+    if kind == "eddi":
+        return Eddi(conn, serial)
+    if kind == "harvi":
+        return Eddi(conn, serial)
+    raise Exception(f"Unsupported device type {kind}")
+
+
 class MyEnergiClient:
     """Zappi Client for MyEnergi API."""
 
@@ -20,7 +31,7 @@ class MyEnergiClient:
 
     async def _initDevices(self):
         if not self._inited:
-            data = await self.refresh()
+            data = await self.getData()
             self._inited = True
             for grp in data:
                 key = list(grp.keys())[0]
@@ -40,6 +51,9 @@ class MyEnergiClient:
                         )
 
     async def refresh(self):
+        self._data = await self.getData()
+
+    async def getData(self):
         data = await self._connection.get("/cgi-jstatus-*")
         return data
 

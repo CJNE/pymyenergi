@@ -1,25 +1,24 @@
 from pymyenergi.connection import Connection
 
+from .base_device import BaseDevice
 
-class Eddi:
+
+class Eddi(BaseDevice):
     """Eddi Client for MyEnergi API."""
 
     def __init__(self, connection: Connection, serialno, data={}) -> None:
-        self._connection = connection
-        self._serialno = serialno
-        self._data = data
+        super().__init__(connection, serialno, data)
 
-    async def refresh(self):
-        self._data = await self._connection.get(f"/cgi-jstatus-E{self._serialno}")
-        return self._data
+    @property
+    def kind(self):
+        return "eddi"
 
-    async def getData(self, refresh=False):
-        if refresh:
-            await self.refresh()
-        return self._data
+    async def getData(self):
+        response = await self._connection.get(f"/cgi-jstatus-H{self._serialno}")
+        data = response["eddi"][0]
+        return data
 
-    def __str__(self):
-        return f"Eddi S/N: {self._serialno}"
-
-    def __repr__(self):
-        return self.__str__()
+    async def stop(self):
+        """Stop diverting"""
+        await self._connection.get(f"/cgi-zappi-mode-E{self._serialno}-0-0-0-0000")
+        return True

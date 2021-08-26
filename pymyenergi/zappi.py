@@ -1,6 +1,6 @@
 from pymyenergi.connection import Connection
 
-from .ct import CT
+from .base_device import BaseDevice
 
 CHARGE_MODES = [None, "Fast", "Eco", "Eco+", "Stopped"]
 STATES = ["Unkn0", "Paused", "Unkn2", "Charging", "Unkn4", "Completed"]
@@ -14,23 +14,15 @@ PLUG_STATES = {
 }
 
 
-class Zappi:
+class Zappi(BaseDevice):
     """Zappi Client for MyEnergi API."""
 
     def __init__(self, connection: Connection, serialno, data=None) -> None:
-        self._connection = connection
-        self._serialno = serialno
-        self._data = data or {}
+        super().__init__(connection, serialno, data)
 
     @property
-    def serial_number(self):
-        """Serial Number"""
-        return self._data.get("sno", None)
-
-    @property
-    def firmware_version(self):
-        """Firmware version"""
-        return self._data.get("fwv", None)
+    def kind(self):
+        return "zappi"
 
     @property
     def charge_mode(self):
@@ -43,49 +35,24 @@ class Zappi:
         return self._data.get("che")
 
     @property
-    def date(self):
-        """Device date"""
-        return self._data.get("dat")
-
-    @property
-    def time(self):
-        """Device time"""
-        return self._data.get("tim")
-
-    @property
     def is_dst(self):
         """Is DST in use"""
         return self._data.get("dat") == 1
 
     @property
-    def ct1(self):
-        """Current transformer 1"""
-        return CT(self._data.get("ectt1"), self._data.get("ectp1", 0))
-
-    @property
-    def ct2(self):
-        """Current transformer 2"""
-        return CT(self._data.get("ectt2"), self._data.get("ectp2", 0))
-
-    @property
-    def ct3(self):
-        """Current transformer 3"""
-        return CT(self._data.get("ectt3"), self._data.get("ectp3", 0))
-
-    @property
     def ct4(self):
         """Current transformer 4"""
-        return CT(self._data.get("ectt4"), self._data.get("ectp4", 0))
+        return self._createCT(4)
 
     @property
     def ct5(self):
         """Current transformer 5"""
-        return CT(self._data.get("ectt5"), self._data.get("ectp5", 0))
+        return self._createCT(5)
 
     @property
     def ct6(self):
         """Current transformer 6"""
-        return CT(self._data.get("ectt6"), self._data.get("ectp6", 0))
+        return self._createCT(6)
 
     @property
     def supply_frequency(self):
@@ -187,16 +154,20 @@ class Zappi:
         """Boost amount of energy to add"""
         return self._data.get("tbk", -1)
 
-    async def refresh(self):
-        self._data = await self.getData()
+    async def stop(self):
+        """Stop charge"""
+        await self._connection.get(f"/cgi-zappi-mode-Z{self._serialno}-4-0-0-0000")
+        return True
+
+    async def setMode(self, mode):
+        """Set charge mode, one of Fast, Eco, Eco+ or Stopped"""
+        modeInt = CHARGE_MODES.index(mode.capitalize())
+        await self._connection.get(
+            f"/cgi-zappi-mode-Z{self._serialno}-{modeInt}-0-0-0000"
+        )
+        return True
 
     async def getData(self):
         response = await self._connection.get(f"/cgi-jstatus-Z{self._serialno}")
         data = response["zappi"][0]
         return data
-
-    def __str__(self):
-        return f"Zappi S/N: {self._serialno}"
-
-    def __repr__(self):
-        return f"Zappi{self._serialno}"
