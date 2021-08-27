@@ -5,9 +5,12 @@ from pymyenergi.connection import Connection
 
 
 class CT:
+    """Current Transformer class"""
+
     def __init__(self, name, value, phase=None) -> None:
         self._name = name
         self._value = value
+        self._phase = phase
 
     @property
     def name(self):
@@ -19,23 +22,31 @@ class CT:
         """Power reading of CT clamp in W"""
         return self._value
 
+    @property
+    def phase(self):
+        """What phase the CT is assigned to"""
+        return self._phase
+
 
 class BaseDevice(ABC):
-    def __init__(self, connection: Connection, serialno, data={}) -> None:
+    """Base class for MyEnergi devices"""
+
+    def __init__(self, connection: Connection, serialno, data=None) -> None:
         self._connection = connection
         self._serialno = serialno
-        self._data = data
+        self._data = data or {}
 
     @property
     @abstractmethod
     def kind(self):
-        pass
+        """What kind of device"""
 
-    def _createCT(self, no):
+    def _create_ct(self, ct_number):
+        """Create a CT from data"""
         return CT(
-            self._data.get(f"ectt{no}"),
-            self._data.get(f"ectp{no}", 0),
-            self._data.get(f"ect{no}p", None),
+            self._data.get(f"ectt{ct_number}"),
+            self._data.get(f"ectp{ct_number}", 0),
+            self._data.get(f"ect{ct_number}p", None),
         )
 
     @property
@@ -61,24 +72,25 @@ class BaseDevice(ABC):
     @property
     def ct1(self):
         """Current transformer 1"""
-        return self._createCT(1)
+        return self._create_ct(1)
 
     @property
     def ct2(self):
         """Current transformer 2"""
-        return self._createCT(2)
+        return self._create_ct(2)
 
     @property
     def ct3(self):
         """Current transformer 3"""
-        return self._createCT(3)
+        return self._create_ct(3)
 
     @abstractmethod
-    async def getData(self):
-        pass
+    async def get_data(self):
+        """Fetch data from MyEnergi"""
 
     async def refresh(self):
-        self._data = await self.getData()
+        """Refresh device data"""
+        self._data = await self.get_data()
 
     def __str__(self):
         return f"{self.kind} S/N: {self._serialno}"

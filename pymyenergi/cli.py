@@ -22,7 +22,7 @@ async def main(args):
     try:
         if args.command == "list":
             client = MyEnergiClient(conn)
-            devices = await client.getDevices(args.kind)
+            devices = await client.get_devices(args.kind)
             print(devices)
             # print(json.dumps(devices, indent=2))
         if args.serial is not None and args.kind != "all":
@@ -31,7 +31,10 @@ async def main(args):
                 await device.stop()
                 print("Charging was stopped")
             if args.kind == "zappi" and args.command in ["fast", "eco", "eco+"]:
-                await device.setMode(args.command)
+                await device.set_mode(args.command)
+                print(f"Charging was set to {args.command.capitalize()}")
+            if args.kind == "zappi" and args.command in ["fast", "eco", "eco+"]:
+                await device.set_mode(args.command)
                 print(f"Charging was set to {args.command.capitalize()}")
 
         else:

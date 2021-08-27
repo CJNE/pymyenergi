@@ -154,20 +154,21 @@ class Zappi(BaseDevice):
         """Boost amount of energy to add"""
         return self._data.get("tbk", -1)
 
-    async def stop(self):
+    async def stop_charge(self):
         """Stop charge"""
         await self._connection.get(f"/cgi-zappi-mode-Z{self._serialno}-4-0-0-0000")
         return True
 
-    async def setMode(self, mode):
+    async def set_charge_mode(self, mode):
         """Set charge mode, one of Fast, Eco, Eco+ or Stopped"""
-        modeInt = CHARGE_MODES.index(mode.capitalize())
+        mode_int = CHARGE_MODES.index(mode.capitalize())
         await self._connection.get(
-            f"/cgi-zappi-mode-Z{self._serialno}-{modeInt}-0-0-0000"
+            f"/cgi-zappi-mode-Z{self._serialno}-{mode_int}-0-0-0000"
         )
         return True
 
-    async def getData(self):
+    async def get_data(self):
+        """Fetch data from MyEnergi"""
         response = await self._connection.get(f"/cgi-jstatus-Z{self._serialno}")
         data = response["zappi"][0]
         return data

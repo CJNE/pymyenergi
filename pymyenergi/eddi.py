@@ -13,7 +13,7 @@ class Eddi(BaseDevice):
     def kind(self):
         return "eddi"
 
-    async def getData(self):
+    async def get_data(self):
         response = await self._connection.get(f"/cgi-jstatus-H{self._serialno}")
         data = response["eddi"][0]
         return data
