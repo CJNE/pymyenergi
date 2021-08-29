@@ -31,22 +31,24 @@ class MyEnergiClient:
 
     async def refresh(self):
         """Refresh device data"""
-        self._data = await self.get_data()
+        self._data = await self.fetch_data()
         for grp in self._data:
             key = list(grp.keys())[0]
             if key not in DEVICE_TYPES:
                 continue
             devices = grp[key]
-            for device in devices:
-                serial = device.get("sno")
+            for device_data in devices:
+                serial = device_data.get("sno")
                 existing_device = self.devices.get(serial, None)
                 if existing_device is None:
-                    device_obj = device_factory(self._connection, key, serial, device)
+                    device_obj = device_factory(
+                        self._connection, key, serial, device_data
+                    )
                     self.devices[serial] = device_obj
                 else:
-                    existing_device.setData(device)
+                    existing_device.data = device_data
 
-    async def get_data(self):
+    async def fetch_data(self):
         """Fetch data from MyEnergi"""
         data = await self._connection.get("/cgi-jstatus-*")
         return data

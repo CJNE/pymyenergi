@@ -2,8 +2,8 @@ from pymyenergi.connection import Connection
 
 from .base_device import BaseDevice
 
-CHARGE_MODES = [None, "Fast", "Eco", "Eco+", "Stopped"]
-STATES = ["Unkn0", "Paused", "Unkn2", "Charging", "Unkn4", "Completed"]
+CHARGE_MODES = ["None", "Fast", "Eco", "Eco+", "Stopped"]
+STATES = ["Unkn0", "Paused", "Unkn2", "Charging", "Boosting", "Completed"]
 PLUG_STATES = {
     "A": "EV Disconnected",
     "B1": "EV Connected",
@@ -19,6 +19,12 @@ class Zappi(BaseDevice):
 
     def __init__(self, connection: Connection, serialno, data=None) -> None:
         super().__init__(connection, serialno, data)
+
+    async def fetch_data(self):
+        """Fetch data from MyEnergi"""
+        response = await self._connection.get(f"/cgi-jstatus-Z{self._serialno}")
+        data = response["zappi"][0]
+        return data
 
     @property
     def kind(self):
@@ -42,17 +48,17 @@ class Zappi(BaseDevice):
     @property
     def ct4(self):
         """Current transformer 4"""
-        return self._createCT(4)
+        return self._create_ct(4)
 
     @property
     def ct5(self):
         """Current transformer 5"""
-        return self._createCT(5)
+        return self._create_ct(5)
 
     @property
     def ct6(self):
         """Current transformer 6"""
-        return self._createCT(6)
+        return self._create_ct(6)
 
     @property
     def supply_frequency(self):
@@ -139,20 +145,61 @@ class Zappi(BaseDevice):
         """Smart boost amount of energy to add"""
         return self._data.get("sbk", -1)
 
-    @property
-    def boost_start_hour(self):
-        """Boost starting at hour"""
-        return self._data.get("tbh", -1)
+    # @property
+    # def boost_start_hour(self):
+    #     """Boost starting at hour ??"""
+    #     return self._data.get("tbh", -1)
 
-    @property
-    def boost_start_minute(self):
-        """Boost starting at minute"""
-        return self._data.get("tbm", -1)
+    # @property
+    # def boost_start_minute(self):
+    #     """Boost starting at minute ??"""
+    #     return self._data.get("tbm", -1)
 
     @property
     def boost_amount(self):
         """Boost amount of energy to add"""
         return self._data.get("tbk", -1)
+
+    def show(self):
+        """Returns a string with all data in human readable format"""
+        ret = ""
+        ret = (
+            ret + f"Zappi S/N {self.serial_number} version {self.firmware_version}\n\n"
+        )
+        ret = ret + f"Status: {self.status}\n"
+        ret = ret + f"Plug status: {self.plug_status}\n"
+        ret = ret + f"Locked: {self.locked}\n"
+        ret = ret + f"Charge added: {self.charge_added}\n"
+        ret = ret + f"Priority: {self.priority}\n"
+        ret = ret + f"Charge mode: {self.charge_mode} {self.num_phases} phase\n"
+        ret = ret + "\n"
+        ret = ret + f"Lock when plugged in   : {self.lock_when_pluggedin}\n"
+        ret = ret + f"Lock when unplugged    : {self.lock_when_unplugged}\n"
+        ret = ret + f"Charge when locked     : {self.charge_when_locked}\n"
+        ret = ret + f"Charge session allowed : {self.charge_session_allowed}\n"
+        ret = ret + "\n"
+        ret = ret + f"CT 1 {self.ct1.name} {self.ct1.power}W\n"
+        ret = ret + f"CT 2 {self.ct2.name} {self.ct2.power}W\n"
+        ret = ret + f"CT 3 {self.ct3.name} {self.ct3.power}W\n"
+        if self.ct4.name != "None":
+            ret = ret + f"CT 4 {self.ct4.name} {self.ct4.power}W\n"
+        if self.ct5.name != "None":
+            ret = ret + f"CT 5 {self.ct5.name} {self.ct5.power}W\n"
+        if self.ct6.name != "None":
+            ret = ret + f"CT 6 {self.ct6.name} {self.ct6.power}W\n"
+        ret = ret + "\n"
+        ret = ret + f"Supply voltage: {self.supply_voltage}V\n"
+        ret = ret + f"Line frequency: {self.supply_frequency}Hz\n"
+        ret = ret + "Power:\n"
+        ret = ret + f"  Grid      : {self.power_grid}W\n"
+        ret = ret + f"  Generated : {self.power_generated}W\n"
+        ret = ret + "\n"
+        ret = ret + f"Boost with {self.boost_amount}kWh\n"
+        ret = ret + "Smart Boost start at"
+        ret = ret + f" {self.smart_boost_start_hour}:{self.smart_boost_start_minute}"
+        ret = ret + f" add {self.smart_boost_amount}kWh\n"
+        ret = ret + f"Minimum green level: {self.minimum_green_level}%"
+        return ret
 
     async def stop_charge(self):
         """Stop charge"""
@@ -167,8 +214,22 @@ class Zappi(BaseDevice):
         )
         return True
 
-    async def get_data(self):
-        """Fetch data from MyEnergi"""
-        response = await self._connection.get(f"/cgi-jstatus-Z{self._serialno}")
-        data = response["zappi"][0]
-        return data
+    async def start_boost(self, amount):
+        """Start boost"""
+        await self._connection.get(
+            f"/cgi-zappi-mode-Z{self._serialno}-0-10-{int(amount)}-0000"
+        )
+        return True
+
+    async def start_smart_boost(self, amount, complete_by):
+        """Start smart boost"""
+        time = complete_by.replace(":", "")
+        await self._connection.get(
+            f"/cgi-zappi-mode-Z{self._serialno}-0-11-{int(amount)}-{time}"
+        )
+        return True
+
+    async def stop_boost(self):
+        """Stop boost"""
+        await self._connection.get(f"/cgi-zappi-mode-Z{self._serialno}-0-2-0-0000")
+        return True

@@ -1,5 +1,6 @@
 import argparse
 import asyncio
+import json
 import logging
 import sys
 from getpass import getpass
@@ -8,6 +9,7 @@ from pymyenergi.client import device_factory
 from pymyenergi.client import MyEnergiClient
 from pymyenergi.connection import Connection
 from pymyenergi.exceptions import WrongCredentials
+from pymyenergi.zappi import CHARGE_MODES
 
 logging.basicConfig()
 logging.root.setLevel(logging.WARNING)
@@ -23,20 +25,36 @@ async def main(args):
         if args.command == "list":
             client = MyEnergiClient(conn)
             devices = await client.get_devices(args.kind)
-            print(devices)
-            # print(json.dumps(devices, indent=2))
-        if args.serial is not None and args.kind != "all":
-            device = device_factory(conn, args.kind, args.serial)
-            if args.kind in ["zappi", "eddi"] and args.command == "stop":
-                await device.stop()
+            for device in devices:
+                if args.json:
+                    print(json.dumps(device.data, indent=2))
+                else:
+                    print(device.show())
+        elif args.command == "zappi":
+            device = device_factory(conn, "zappi", args.serial)
+            await device.refresh()
+            if args.action == "show":
+                if args.json:
+                    print(json.dumps(device.data, indent=2))
+                else:
+                    print(device.show())
+            elif args.action == "stop":
+                await device.stop_charge()
                 print("Charging was stopped")
-            if args.kind == "zappi" and args.command in ["fast", "eco", "eco+"]:
-                await device.set_mode(args.command)
-                print(f"Charging was set to {args.command.capitalize()}")
-            if args.kind == "zappi" and args.command in ["fast", "eco", "eco+"]:
-                await device.set_mode(args.command)
-                print(f"Charging was set to {args.command.capitalize()}")
-
+            elif args.action == "mode":
+                if len(args.arg) < 1 or args.arg[0].capitalize() not in CHARGE_MODES:
+                    modes = ", ".join(CHARGE_MODES)
+                    sys.exit(f"A mode must be specifed, one of {modes}")
+                await device.set_charge_mode(args.arg[0])
+                print(f"Charging was set to {args.arg[0].capitalize()}")
+            elif args.action == "boost":
+                await device.start_boost(args.arg[0])
+                print(f"Start boosting with {args.arg[0]}kWh")
+            elif args.action == "smart-boost":
+                await device.start_smart_boost(args.arg[0], args.arg[1])
+                print(
+                    f"Start smart boosting with {args.arg[0]}kWh complete by {args.arg[1]}"
+                )
         else:
             sys.exit("A serial number is needed")
     except WrongCredentials:
@@ -46,13 +64,20 @@ async def main(args):
 
 
 def cli():
-    parser = argparse.ArgumentParser(description="MyEnergi CLI.")
-    parser.add_argument("command", choices=["list", "stop", "eco", "eco+", "fast"])
+    parser = argparse.ArgumentParser(prog="myenergi", description="MyEnergi CLI.")
     parser.add_argument("-u", "--username", dest="username", default=None)
     parser.add_argument("-p", "--password", dest="password", default=None)
-    parser.add_argument("-k", "--kind", dest="kind", default="all")
-    parser.add_argument("-s", "--serial", dest="serial", default=None)
     parser.add_argument("-d", "--debug", dest="debug", action="store_true")
+    parser.add_argument("-j", "--json", dest="json", action="store_true", default=False)
+    subparsers = parser.add_subparsers(dest="command", help="sub-command help")
+    subparser_list = subparsers.add_parser("list", help="list help")
+    subparser_list.add_argument("-k", "--kind", dest="kind", default="all")
+    subparser_zappi = subparsers.add_parser("zappi", help="zappi help")
+    subparser_zappi.add_argument("serial", default=None)
+    subparser_zappi.add_argument(
+        "action", choices=["show", "stop", "mode", "boost", "smart-boost"]
+    )
+    subparser_zappi.add_argument("arg", nargs="*")
 
     args = parser.parse_args()
 

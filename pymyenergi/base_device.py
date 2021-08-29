@@ -44,7 +44,7 @@ class BaseDevice(ABC):
     def _create_ct(self, ct_number):
         """Create a CT from data"""
         return CT(
-            self._data.get(f"ectt{ct_number}"),
+            self._data.get(f"ectt{ct_number}", None),
             self._data.get(f"ectp{ct_number}", 0),
             self._data.get(f"ect{ct_number}p", None),
         )
@@ -84,13 +84,23 @@ class BaseDevice(ABC):
         """Current transformer 3"""
         return self._create_ct(3)
 
+    @property
+    def data(self):
+        """All device data"""
+        return self._data
+
+    @data.setter
+    def data(self, value):
+        """Set all device data"""
+        self._data = value
+
     @abstractmethod
-    async def get_data(self):
+    async def fetch_data(self):
         """Fetch data from MyEnergi"""
 
     async def refresh(self):
         """Refresh device data"""
-        self._data = await self.get_data()
+        self.data = await self.fetch_data()
 
     def __str__(self):
         return f"{self.kind} S/N: {self._serialno}"

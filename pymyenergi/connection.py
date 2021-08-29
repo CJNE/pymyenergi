@@ -19,7 +19,7 @@ class Connection:
     """Connection to MyEnergi API."""
 
     def __init__(
-        self, username: Text = None, password: Text = None, timeout: int = 5
+        self, username: Text = None, password: Text = None, timeout: int = 15
     ) -> None:
         """Initialize connection object."""
         self.timeout = timeout
