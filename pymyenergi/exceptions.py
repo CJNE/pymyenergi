@@ -8,7 +8,7 @@ import logging
 _LOGGER = logging.getLogger(__name__)
 
 
-class MyEnergiException(Exception):
+class MyenergiException(Exception):
     """Class of Porsche API exceptions."""
 
     def __init__(self, code=None, *args, **kwargs):
@@ -42,5 +42,5 @@ class MyEnergiException(Exception):
                 self.message = f"UNKNOWN_ERROR_{self.code}"
 
 
-class WrongCredentials(MyEnergiException):
+class WrongCredentials(MyenergiException):
     """Class of exceptions for incomplete credentials."""

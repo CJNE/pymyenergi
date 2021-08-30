@@ -15,13 +15,13 @@ PLUG_STATES = {
 
 
 class Zappi(BaseDevice):
-    """Zappi Client for MyEnergi API."""
+    """Zappi Client for myenergi API."""
 
     def __init__(self, connection: Connection, serialno, data=None) -> None:
         super().__init__(connection, serialno, data)
 
     async def fetch_data(self):
-        """Fetch data from MyEnergi"""
+        """Fetch data from myenergi"""
         response = await self._connection.get(f"/cgi-jstatus-Z{self._serialno}")
         data = response["zappi"][0]
         return data
@@ -29,6 +29,10 @@ class Zappi(BaseDevice):
     @property
     def kind(self):
         return "zappi"
+
+    @property
+    def prefix(self):
+        return "Z"
 
     @property
     def charge_mode(self):
@@ -163,9 +167,10 @@ class Zappi(BaseDevice):
     def show(self):
         """Returns a string with all data in human readable format"""
         ret = ""
-        ret = (
-            ret + f"Zappi S/N {self.serial_number} version {self.firmware_version}\n\n"
-        )
+        if self.name:
+            name = f" {self.name}"
+        ret = ret + f"Zappi{name} "
+        ret = ret + "S/N {self.serial_number} version {self.firmware_version}\n\n"
         ret = ret + f"Status: {self.status}\n"
         ret = ret + f"Plug status: {self.plug_status}\n"
         ret = ret + f"Locked: {self.locked}\n"

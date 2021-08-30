@@ -7,7 +7,7 @@ setup(
     version="0.0.1",
     author="Johan Isaksson",
     author_email="johan@generatorhallen.se",
-    description="Python library and CLI for communicating with MyEnergi API.",
+    description="Python library and CLI for communicating with myenergi API.",
     include_package_data=True,
     url="https://github.com/cjne/pymyenergi",
     license="MIT",

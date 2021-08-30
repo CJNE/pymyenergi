@@ -18,8 +18,8 @@ def device_factory(conn, kind, serial, data=None):
     raise Exception(f"Unsupported device type {kind}")
 
 
-class MyEnergiClient:
-    """Zappi Client for MyEnergi API."""
+class MyenergiClient:
+    """Zappi Client for myenergi API."""
 
     def __init__(
         self,
@@ -28,10 +28,23 @@ class MyEnergiClient:
         self._connection = connection
         self.devices = {}
         self._data = []
+        self._keys = None
+
+    @property
+    def site_name(self):
+        """myenergi API site name"""
+        return self.find_device_name("siteName", f"Hub_{self._connection.username}")
+
+    def find_device_name(self, key, default_value):
+        """Find device or site name"""
+        keys = list(self._keys.values())[0]
+        return next((item["val"] for item in keys if item["key"] == key), default_value)
 
     async def refresh(self):
         """Refresh device data"""
-        self._data = await self.fetch_data()
+        data = await self.fetch_data()
+        self._data = data["devices"]
+        self._keys = data["keys"]
         for grp in self._data:
             key = list(grp.keys())[0]
             if key not in DEVICE_TYPES:
@@ -44,13 +57,21 @@ class MyEnergiClient:
                     device_obj = device_factory(
                         self._connection, key, serial, device_data
                     )
+                    serial_key = device_obj.prefix + str(device_obj.serial_number)
+                    device_obj.name = self.find_device_name(
+                        serial_key, f"{device_obj.kind}-{device_obj.serial_number}"
+                    )
                     self.devices[serial] = device_obj
                 else:
                     existing_device.data = device_data
 
     async def fetch_data(self):
-        """Fetch data from MyEnergi"""
-        data = await self._connection.get("/cgi-jstatus-*")
+        """Fetch data from myenergi"""
+        keys = self._keys
+        if keys is None:
+            keys = await self._connection.get("/cgi-get-app-key-")
+        devices = await self._connection.get("/cgi-jstatus-*")
+        data = {"devices": devices, "keys": keys}
         return data
 
     async def get_devices(self, kind="all", refresh=True):

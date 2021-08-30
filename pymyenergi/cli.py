@@ -6,7 +6,7 @@ import sys
 from getpass import getpass
 
 from pymyenergi.client import device_factory
-from pymyenergi.client import MyEnergiClient
+from pymyenergi.client import MyenergiClient
 from pymyenergi.connection import Connection
 from pymyenergi.exceptions import WrongCredentials
 from pymyenergi.zappi import CHARGE_MODES
@@ -23,7 +23,7 @@ async def main(args):
         logging.root.setLevel(logging.DEBUG)
     try:
         if args.command == "list":
-            client = MyEnergiClient(conn)
+            client = MyenergiClient(conn)
             devices = await client.get_devices(args.kind)
             for device in devices:
                 if args.json:
@@ -64,7 +64,7 @@ async def main(args):
 
 
 def cli():
-    parser = argparse.ArgumentParser(prog="myenergi", description="MyEnergi CLI.")
+    parser = argparse.ArgumentParser(prog="myenergi", description="myenergi CLI.")
     parser.add_argument("-u", "--username", dest="username", default=None)
     parser.add_argument("-p", "--password", dest="password", default=None)
     parser.add_argument("-d", "--debug", dest="debug", action="store_true")

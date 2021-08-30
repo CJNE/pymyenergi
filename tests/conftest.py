@@ -16,14 +16,14 @@ def load_fixture_json(name):
 @pytest.fixture(name="bypass_client_fetch_data")
 def bypass_client_fetch_data_fixture():
     """Skip calls to get data from API."""
-    with patch("pymyenergi.client.MyEnergiClient.fetch_data"):
+    with patch("pymyenergi.client.MyenergiClient.fetch_data"):
         yield
 
 
 @pytest.fixture(name="error_on_client_fetch_data")
 def error_client_fetch_data_fixture():
     """Simulate error when retrieving data from API."""
-    with patch("pymyenergi.client.MyEnergiClient.fetch_data", side_effect=Exception):
+    with patch("pymyenergi.client.MyenergiClient.fetch_data", side_effect=Exception):
         yield
 
 
@@ -31,7 +31,7 @@ def error_client_fetch_data_fixture():
 def client_fetch_data_fixture():
     """Mock data from client.fetch_data()"""
     with patch(
-        "pymyenergi.client.MyEnergiClient.fetch_data",
+        "pymyenergi.client.MyenergiClient.fetch_data",
         return_value=load_fixture_json("client"),
     ):
         yield

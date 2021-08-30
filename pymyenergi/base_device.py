@@ -29,12 +29,13 @@ class CT:
 
 
 class BaseDevice(ABC):
-    """Base class for MyEnergi devices"""
+    """Base class for myenergi devices"""
 
     def __init__(self, connection: Connection, serialno, data=None) -> None:
         self._connection = connection
         self._serialno = serialno
         self._data = data or {}
+        self._name = None
 
     @property
     @abstractmethod
@@ -48,6 +49,15 @@ class BaseDevice(ABC):
             self._data.get(f"ectp{ct_number}", 0),
             self._data.get(f"ect{ct_number}p", None),
         )
+
+    @property
+    def name(self):
+        """Name of device"""
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        self._name = value
 
     @property
     def serial_number(self):
@@ -96,7 +106,7 @@ class BaseDevice(ABC):
 
     @abstractmethod
     async def fetch_data(self):
-        """Fetch data from MyEnergi"""
+        """Fetch data from myenergi"""
 
     async def refresh(self):
         """Refresh device data"""

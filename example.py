@@ -2,7 +2,7 @@ import asyncio
 import logging
 from sys import argv
 
-from pymyenergi.client import MyEnergiClient
+from pymyenergi.client import MyenergiClient
 from pymyenergi.connection import Connection
 
 logging.basicConfig()
@@ -14,7 +14,7 @@ password = argv[2]
 
 async def zappis() -> None:
     conn = Connection(user, password)
-    client = MyEnergiClient(conn)
+    client = MyenergiClient(conn)
 
     zappis = await client.getDevices("zappi")
     for zappi in zappis:

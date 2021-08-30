@@ -1,6 +1,6 @@
 #  SPDX-License-Identifier: Apache-2.0
 """
-Python Package for connecting to MyEnergi API.
+Python Package for connecting to myenergi API.
 
 """
 import logging
@@ -9,14 +9,14 @@ from typing import Text
 
 import httpx
 
-from .exceptions import MyEnergiException
+from .exceptions import MyenergiException
 from .exceptions import WrongCredentials
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class Connection:
-    """Connection to MyEnergi API."""
+    """Connection to myenergi API."""
 
     def __init__(
         self, username: Text = None, password: Text = None, timeout: int = 15
@@ -34,17 +34,17 @@ class Connection:
         )
         _LOGGER.debug("New connection created")
 
-    def _checkMyEnergiServerURL(self, responseHeader):
-        _LOGGER.debug("Extract MyEnergi ASN from Myenergi header")
+    def _checkMyenergiServerURL(self, responseHeader):
+        _LOGGER.debug("Extract Myenergi ASN from Myenergi header")
         if "X_MYENERGI-asn" in responseHeader:
             self.base_url = "https://" + responseHeader["X_MYENERGI-asn"]
         else:
-            _LOGGER.debug("MyEnergi ASN not found in Myenergi header")
+            _LOGGER.debug("Myenergi ASN not found in Myenergi header")
 
     async def send(self, method, url, json=None):
         # If base URL has not been set, make a request to director to fetch it
         if self.base_url is None:
-            _LOGGER.debug("Get MyEnergi base url from director")
+            _LOGGER.debug("Get Myenergi base url from director")
             try:
                 directorUrl = self.director_url + "/cgi-jstatus-E"
                 response = await self._httpclient.get(directorUrl)
@@ -52,7 +52,7 @@ class Connection:
                 _LOGGER.error("Myenergi server request problem")
                 _LOGGER.debug(sys.exc_info()[0])
             else:
-                self._checkMyEnergiServerURL(response.headers)
+                self._checkMyenergiServerURL(response.headers)
         theUrl = self.base_url + url
         try:
             _LOGGER.debug(f"{method} {url} {theUrl}")
@@ -65,7 +65,7 @@ class Connection:
                 return response.json()
             elif response.status_code == 401:
                 raise WrongCredentials()
-            raise MyEnergiException(response.status_code)
+            raise MyenergiException(response.status_code)
 
     async def get(self, url):
         return await self.send("GET", url)
@@ -80,5 +80,5 @@ class Connection:
         return await self.send("DELETE", url, data)
 
     async def close(self):
-        _LOGGER.debug("Closing MyEnergi http client connection")
+        _LOGGER.debug("Closing Myenergi http client connection")
         await self._httpclient.aclose()

@@ -1,10 +1,10 @@
 # pymyenergi
 
-An async python library for MyEnergi API
+An async python library for myenergi API
 
 This is a very early release, things are changing rapidly so use at your own risk!
 
-_NOTE:_ This work is not officially supported by MyEnergi and functionality can stop working at any time without warning
+_NOTE:_ This work is not officially supported by myenergi and functionality can stop working at any time without warning
 
 ## Installation
 
@@ -31,7 +31,7 @@ If no username or password is supplied as input arguments you will be prompted.
 ```
 usage: cli.py [-h] [-u USERNAME] [-p PASSWORD] [-k KIND] [-d] {list}
 
-MyEnergi CLI.
+myenergi CLI.
 
 positional arguments:
   {list}
@@ -53,7 +53,7 @@ Install pymyenergi using pip (requires python > 3.6)
 ```
 import asyncio
 from pymyenergi.connection import Connection
-from pymyenergi.client import MyEnergiClient
+from pymyenergi.client import MyenergiClient
 from sys import argv
 import logging
 
@@ -65,7 +65,7 @@ password = argv[2]
 
 async def zappis() -> None:
     conn = Connection(user, password)
-    client = MyEnergiClient(conn)
+    client = MyenergiClient(conn)
 
     zappis = await client.getDevices('zappi')
     for zappi in zappis:
