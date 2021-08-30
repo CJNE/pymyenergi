@@ -22,6 +22,11 @@ class Eddi(BaseDevice):
     def prefix(self):
         return "E"
 
+    @property
+    def l1_phase(self):
+        """What phase L1 is connected to"""
+        return self._data.get("pha", 0)
+
     async def stop(self):
         """Stop diverting"""
         await self._connection.get(f"/cgi-zappi-mode-E{self._serialno}-0-0-0-0000")

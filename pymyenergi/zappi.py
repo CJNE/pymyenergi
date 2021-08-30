@@ -100,8 +100,8 @@ class Zappi(BaseDevice):
         return self._data.get("pri", 0)
 
     @property
-    def num_phases(self):
-        """Number of phases"""
+    def l1_phase(self):
+        """What phase L1 is connected to"""
         return self._data.get("pha", 0)
 
     @property
@@ -176,7 +176,7 @@ class Zappi(BaseDevice):
         ret = ret + f"Locked: {self.locked}\n"
         ret = ret + f"Charge added: {self.charge_added}\n"
         ret = ret + f"Priority: {self.priority}\n"
-        ret = ret + f"Charge mode: {self.charge_mode} {self.num_phases} phase\n"
+        ret = ret + f"Charge mode: {self.charge_mode}\n"
         ret = ret + "\n"
         ret = ret + f"Lock when plugged in   : {self.lock_when_pluggedin}\n"
         ret = ret + f"Lock when unplugged    : {self.lock_when_unplugged}\n"
@@ -195,6 +195,7 @@ class Zappi(BaseDevice):
         ret = ret + "\n"
         ret = ret + f"Supply voltage: {self.supply_voltage}V\n"
         ret = ret + f"Line frequency: {self.supply_frequency}Hz\n"
+        ret = ret + f"L1 phase: {self.l1_phase}\n"
         ret = ret + "Power:\n"
         ret = ret + f"  Grid      : {self.power_grid}W\n"
         ret = ret + f"  Generated : {self.power_generated}W\n"
