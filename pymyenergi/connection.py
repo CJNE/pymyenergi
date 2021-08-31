@@ -19,7 +19,7 @@ class Connection:
     """Connection to myenergi API."""
 
     def __init__(
-        self, username: Text = None, password: Text = None, timeout: int = 15
+        self, username: Text = None, password: Text = None, timeout: int = 20
     ) -> None:
         """Initialize connection object."""
         self.timeout = timeout
@@ -39,7 +39,10 @@ class Connection:
         if "X_MYENERGI-asn" in responseHeader:
             self.base_url = "https://" + responseHeader["X_MYENERGI-asn"]
         else:
-            _LOGGER.debug("Myenergi ASN not found in Myenergi header")
+            _LOGGER.debug(
+                "Myenergi ASN not found in Myenergi header, assume auth failure (bad username)"
+            )
+            raise WrongCredentials()
 
     async def send(self, method, url, json=None):
         # If base URL has not been set, make a request to director to fetch it
