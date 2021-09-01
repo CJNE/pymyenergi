@@ -33,9 +33,11 @@ class Connection:
         _LOGGER.debug("New connection created")
 
     def _checkMyenergiServerURL(self, responseHeader):
-        _LOGGER.debug("Extract Myenergi ASN from Myenergi header")
         if "X_MYENERGI-asn" in responseHeader:
-            self.base_url = "https://" + responseHeader["X_MYENERGI-asn"]
+            new_url = "https://" + responseHeader["X_MYENERGI-asn"]
+            if new_url != self.base_url:
+                _LOGGER.info(f"Updated myenergi active server to {new_url}")
+            self.base_url = new_url
         else:
             _LOGGER.debug(
                 "Myenergi ASN not found in Myenergi header, assume auth failure (bad username)"
@@ -66,6 +68,7 @@ class Connection:
                 raise TimeoutException()
             else:
                 _LOGGER.debug(f"GET status {response.status_code}")
+                self._checkMyenergiServerURL(response.headers)
                 if response.status_code == 200:
                     return response.json()
                 elif response.status_code == 401:
