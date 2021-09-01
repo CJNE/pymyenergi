@@ -30,6 +30,15 @@ async def main(args):
                     print(json.dumps(device.data, indent=2))
                 else:
                     print(device.show())
+        elif args.command == "overview":
+            client = MyenergiClient(conn)
+            devices = await client.get_devices()
+            out = f"Site name: {client.site_name}\n"
+            out = out + f"Home consumption: {client.consumption_home}\n"
+            out = out + "Devices:\n"
+            for device in devices:
+                out = out + f"  {device.kind.capitalize()}: {device.name}\n"
+            print(out)
         elif args.command == "zappi":
             device = device_factory(conn, "zappi", args.serial)
             await device.refresh()
@@ -59,8 +68,6 @@ async def main(args):
             sys.exit("A serial number is needed")
     except WrongCredentials:
         sys.exit("Wrong username or password")
-    finally:
-        await conn.close()
 
 
 def cli():
@@ -72,6 +79,7 @@ def cli():
     subparsers = parser.add_subparsers(dest="command", help="sub-command help")
     subparser_list = subparsers.add_parser("list", help="list help")
     subparser_list.add_argument("-k", "--kind", dest="kind", default="all")
+    subparsers.add_parser("overview", help="overview help")
     subparser_zappi = subparsers.add_parser("zappi", help="zappi help")
     subparser_zappi.add_argument("serial", default=None)
     subparser_zappi.add_argument(

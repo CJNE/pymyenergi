@@ -44,3 +44,11 @@ class MyenergiException(Exception):
 
 class WrongCredentials(MyenergiException):
     """Class of exceptions for incomplete credentials."""
+
+    pass
+
+
+class TimeoutException(MyenergiException):
+    """Class of exceptions for incomplete credentials."""
+
+    pass

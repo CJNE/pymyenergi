@@ -10,6 +10,7 @@ from typing import Text
 import httpx
 
 from .exceptions import MyenergiException
+from .exceptions import TimeoutException
 from .exceptions import WrongCredentials
 
 _LOGGER = logging.getLogger(__name__)
@@ -29,9 +30,6 @@ class Connection:
         self.password = password
         self.auth = httpx.DigestAuth(self.username, self.password)
         self.headers = {"User-Agent": "Wget/1.14 (linux-gnu)"}
-        self._httpclient = httpx.AsyncClient(
-            auth=self.auth, headers=self.headers, timeout=self.timeout
-        )
         _LOGGER.debug("New connection created")
 
     def _checkMyenergiServerURL(self, responseHeader):
@@ -46,29 +44,33 @@ class Connection:
 
     async def send(self, method, url, json=None):
         # If base URL has not been set, make a request to director to fetch it
-        if self.base_url is None:
-            _LOGGER.debug("Get Myenergi base url from director")
+
+        async with httpx.AsyncClient(
+            auth=self.auth, headers=self.headers, timeout=self.timeout
+        ) as httpclient:
+            if self.base_url is None:
+                _LOGGER.debug("Get Myenergi base url from director")
+                try:
+                    directorUrl = self.director_url + "/cgi-jstatus-E"
+                    response = await httpclient.get(directorUrl)
+                except Exception:
+                    _LOGGER.error("Myenergi server request problem")
+                    _LOGGER.debug(sys.exc_info()[0])
+                else:
+                    self._checkMyenergiServerURL(response.headers)
+            theUrl = self.base_url + url
             try:
-                directorUrl = self.director_url + "/cgi-jstatus-E"
-                response = await self._httpclient.get(directorUrl)
-            except Exception:
-                _LOGGER.error("Myenergi server request problem")
-                _LOGGER.debug(sys.exc_info()[0])
+                _LOGGER.debug(f"{method} {url} {theUrl}")
+                response = await httpclient.request(method, theUrl, json=json)
+            except httpx.ReadTimeout:
+                raise TimeoutException()
             else:
-                self._checkMyenergiServerURL(response.headers)
-        theUrl = self.base_url + url
-        try:
-            _LOGGER.debug(f"{method} {url} {theUrl}")
-            response = await self._httpclient.request(method, theUrl, json=json)
-        except httpx.ReadTimeout:
-            raise Exception("Read timeout")
-        else:
-            _LOGGER.debug(f"GET status {response.status_code}")
-            if response.status_code == 200:
-                return response.json()
-            elif response.status_code == 401:
-                raise WrongCredentials()
-            raise MyenergiException(response.status_code)
+                _LOGGER.debug(f"GET status {response.status_code}")
+                if response.status_code == 200:
+                    return response.json()
+                elif response.status_code == 401:
+                    raise WrongCredentials()
+                raise MyenergiException(response.status_code)
 
     async def get(self, url):
         return await self.send("GET", url)
@@ -81,7 +83,3 @@ class Connection:
 
     async def delete(self, url, data=None):
         return await self.send("DELETE", url, data)
-
-    async def close(self):
-        _LOGGER.debug("Closing Myenergi http client connection")
-        await self._httpclient.aclose()

@@ -35,6 +35,61 @@ class MyenergiClient:
         """myenergi API site name"""
         return self.find_device_name("siteName", f"Hub_{self._connection.username}")
 
+    @property
+    def serial_number(self):
+        """Hub serial number"""
+        return self._connection.username
+
+    def get_totals(self):
+        total_generation = 0
+        total_grid = 0
+        zappis = self.get_devices_sync("zappi")
+        eddis = self.get_devices_sync("eddi")
+        harvis = self.get_devices_sync("harvi")
+        if len(zappis):
+            total_grid = zappis[0].power_grid
+            total_generation = zappis[0].power_generated
+        elif len(eddis):
+            total_grid = eddis[0].power_grid
+            total_generation = eddis[0].power_generated
+        elif len(harvis):
+            harvi = harvis[0]
+            if harvi.ct1.is_generation:
+                total_generation = total_generation + harvi.ct1.power
+            elif harvi.ct1.is_grid:
+                total_grid = total_grid + harvi.ct1.power
+            if harvi.ct2.is_generation:
+                total_generation = total_generation + harvi.ct2.power
+            elif harvi.ct2.is_grid:
+                total_grid = total_grid + harvi.ct2.power
+            if harvi.ct3.is_generation:
+                total_generation = total_generation + harvi.ct3.power
+            elif harvi.ct3.is_grid:
+                total_grid = total_grid + harvi.ct3.power
+
+        return total_generation, total_grid
+
+    @property
+    def consumption_home(self):
+        """Calculates home consumption"""
+        # calculation is all generation + grid
+        total_generation, total_grid = self.get_totals()
+        return total_generation + total_grid
+
+    @property
+    def power_grid(self):
+        """Calculates home consumption"""
+        # calculation is all generation + grid
+        total_generation, total_grid = self.get_totals()
+        return total_grid
+
+    @property
+    def power_generation(self):
+        """Calculates home consumption"""
+        # calculation is all generation + grid
+        total_generation, total_grid = self.get_totals()
+        return total_generation
+
     def find_device_name(self, key, default_value):
         """Find device or site name"""
         keys = list(self._keys.values())[0]
@@ -78,6 +133,10 @@ class MyenergiClient:
         """Fetch devices, all or of a specific kind"""
         if refresh:
             await self.refresh()
+        return self.get_devices_sync(kind)
+
+    def get_devices_sync(self, kind="all"):
+        """Return current devices"""
         all_devices = list(self.devices.values())
         if kind == "all":
             return all_devices

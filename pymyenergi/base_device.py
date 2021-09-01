@@ -27,6 +27,14 @@ class CT:
         """What phase the CT is assigned to"""
         return self._phase
 
+    @property
+    def is_generation(self):
+        return "generation" in self._name.lower()
+
+    @property
+    def is_grid(self):
+        return "grid" in self._name.lower()
+
 
 class BaseDevice(ABC):
     """Base class for myenergi devices"""

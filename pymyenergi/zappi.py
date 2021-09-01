@@ -167,10 +167,11 @@ class Zappi(BaseDevice):
     def show(self):
         """Returns a string with all data in human readable format"""
         ret = ""
+        name = ""
         if self.name:
             name = f" {self.name}"
         ret = ret + f"Zappi{name} "
-        ret = ret + "S/N {self.serial_number} version {self.firmware_version}\n\n"
+        ret = ret + f"S/N {self.serial_number} version {self.firmware_version}\n\n"
         ret = ret + f"Status: {self.status}\n"
         ret = ret + f"Plug status: {self.plug_status}\n"
         ret = ret + f"Locked: {self.locked}\n"

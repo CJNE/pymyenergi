@@ -71,8 +71,6 @@ async def zappis() -> None:
     for zappi in zappis:
         print(f"Zappi {zappi.serial_number} charge mode {zappi.charge_mode}")
 
-    await conn.close()
-
 loop = asyncio.get_event_loop()
 loop.run_until_complete(zappis())
 ```
@@ -123,7 +121,6 @@ async def get_data() -> None:
     print("")
     print(f"      Boost start at {zappi.boost_start_hour}:{zappi.boost_start_minute} add {zappi.boost_amount}kWh")
     print(f"Smart Boost start at {zappi.smart_boost_start_hour}:{zappi.smart_boost_start_minute} add {zappi.smart_boost_amount}kWh")
-    await conn.close()
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(get_data())

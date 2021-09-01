@@ -12,16 +12,14 @@ user = argv[1]
 password = argv[2]
 
 
-async def zappis() -> None:
+async def get_zappis() -> None:
     conn = Connection(user, password)
     client = MyenergiClient(conn)
 
-    zappis = await client.getDevices("zappi")
+    zappis = await client.get_devices("zappi")
     for zappi in zappis:
         print(f"Zappi {zappi.serial_number} charge mode {zappi.charge_mode}")
 
-    await conn.close()
-
 
 loop = asyncio.get_event_loop()
-loop.run_until_complete(zappis())
+loop.run_until_complete(get_zappis())

@@ -22,7 +22,7 @@ async def get_data() -> None:
         f"Status: {zappi.status} Plug status: {zappi.plug_status} Locked: {zappi.locked}"
     )
     print(f"Priority: {zappi.priority}")
-    print(f"Charge mode: {zappi.charge_mode} {zappi.num_phases} phase")
+    print(f"Charge mode: {zappi.charge_mode}")
     print("")
     print(f"Lock when plugged in   : {zappi.lock_when_pluggedin}")
     print(f"Lock when unplugged    : {zappi.lock_when_unplugged}")
@@ -43,14 +43,6 @@ async def get_data() -> None:
     print("Power:")
     print(f"  Grid      : {zappi.power_grid}W")
     print(f"  Generated : {zappi.power_generated}W")
-    print("")
-    print(
-        f"      Boost start at {zappi.boost_start_hour}:{zappi.boost_start_minute} add {zappi.boost_amount}kWh"
-    )
-    print(
-        f"Smart Boost start at {zappi.smart_boost_start_hour}:{zappi.smart_boost_start_minute} add {zappi.smart_boost_amount}kWh"
-    )
-    await conn.close()
 
 
 loop = asyncio.get_event_loop()
