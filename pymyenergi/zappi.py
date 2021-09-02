@@ -1,5 +1,6 @@
 from pymyenergi.connection import Connection
 
+from . import ZAPPI
 from .base_device import BaseDevice
 
 CHARGE_MODES = ["None", "Fast", "Eco", "Eco+", "Stopped"]
@@ -23,12 +24,12 @@ class Zappi(BaseDevice):
     async def fetch_data(self):
         """Fetch data from myenergi"""
         response = await self._connection.get(f"/cgi-jstatus-Z{self._serialno}")
-        data = response["zappi"][0]
+        data = response[ZAPPI][0]
         return data
 
     @property
     def kind(self):
-        return "zappi"
+        return ZAPPI
 
     @property
     def prefix(self):

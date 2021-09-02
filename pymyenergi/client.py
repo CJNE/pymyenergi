@@ -1,19 +1,29 @@
+import logging
+
 from pymyenergi.connection import Connection
 
+from . import CT_BATTERY
+from . import CT_GENERATION
+from . import CT_GRID
+from . import CT_LOAD
+from . import DEVICE_TYPES
+from . import EDDI
+from . import HARVI
+from . import ZAPPI
 from .eddi import Eddi
 from .harvi import Harvi
 from .zappi import Zappi
 
-DEVICE_TYPES = ["eddi", "zappi", "harvi"]
+_LOGGER = logging.getLogger(__name__)
 
 
 def device_factory(conn, kind, serial, data=None):
     """Create device instances"""
-    if kind == "zappi":
+    if kind == ZAPPI:
         return Zappi(conn, serial, data)
-    if kind == "eddi":
+    if kind == EDDI:
         return Eddi(conn, serial, data)
-    if kind == "harvi":
+    if kind == HARVI:
         return Harvi(conn, serial, data)
     raise Exception(f"Unsupported device type {kind}")
 
@@ -41,54 +51,59 @@ class MyenergiClient:
         return self._connection.username
 
     def get_totals(self):
-        total_generation = 0
-        total_grid = 0
-        zappis = self.get_devices_sync("zappi")
-        eddis = self.get_devices_sync("eddi")
-        harvis = self.get_devices_sync("harvi")
-        if len(zappis):
-            total_grid = zappis[0].power_grid
-            total_generation = zappis[0].power_generated
-        elif len(eddis):
-            total_grid = eddis[0].power_grid
-            total_generation = eddis[0].power_generated
-        elif len(harvis):
-            harvi = harvis[0]
-            if harvi.ct1.is_generation:
-                total_generation = total_generation + harvi.ct1.power
-            elif harvi.ct1.is_grid:
-                total_grid = total_grid + harvi.ct1.power
-            if harvi.ct2.is_generation:
-                total_generation = total_generation + harvi.ct2.power
-            elif harvi.ct2.is_grid:
-                total_grid = total_grid + harvi.ct2.power
-            if harvi.ct3.is_generation:
-                total_generation = total_generation + harvi.ct3.power
-            elif harvi.ct3.is_grid:
-                total_grid = total_grid + harvi.ct3.power
+        """Get totals for all supported CT types"""
+        devices = self.get_devices_sync()
+        totals = {}
+        zappi_or_eddi = None
+        for device in devices:
+            totals[device.ct1.name] = totals.get(device.ct1.name, 0) + device.ct1.power
+            totals[device.ct2.name] = totals.get(device.ct2.name, 0) + device.ct2.power
+            totals[device.ct3.name] = totals.get(device.ct3.name, 0) + device.ct3.power
+            if device.kind in [ZAPPI, EDDI]:
+                zappi_or_eddi = device
 
-        return total_generation, total_grid
+        if totals.get(CT_GRID, 0) == 0 and zappi_or_eddi is not None:
+            totals[CT_GRID] = zappi_or_eddi.power_grid
+        if totals.get(CT_GENERATION, 0) == 0 and zappi_or_eddi is not None:
+            totals[CT_GENERATION] = zappi_or_eddi.power_generated
+
+        return totals
 
     @property
     def consumption_home(self):
-        """Calculates home consumption"""
-        # calculation is all generation + grid
-        total_generation, total_grid = self.get_totals()
-        return total_generation + total_grid
+        """Calculates home power"""
+        # calculation is all generation + grid + battery - device consumption
+        totals = self.get_totals()
+        return (
+            totals.get(CT_GENERATION, 0)
+            + totals.get(CT_GRID, 0)
+            - totals.get(CT_BATTERY, 0)
+            - totals.get(CT_LOAD, 0)
+        )
 
     @property
     def power_grid(self):
-        """Calculates home consumption"""
-        # calculation is all generation + grid
-        total_generation, total_grid = self.get_totals()
-        return total_grid
+        """Grid total power"""
+        totals = self.get_totals()
+        return totals.get(CT_GRID, 0)
 
     @property
     def power_generation(self):
-        """Calculates home consumption"""
-        # calculation is all generation + grid
-        total_generation, total_grid = self.get_totals()
-        return total_generation
+        """Generation total power"""
+        totals = self.get_totals()
+        return totals.get(CT_GENERATION, 0)
+
+    @property
+    def power_charging(self):
+        """Chargers total power"""
+        totals = self.get_totals()
+        return totals.get(CT_LOAD, 0)
+
+    @property
+    def power_battery(self):
+        """Chargers total power"""
+        totals = self.get_totals()
+        return totals.get(CT_BATTERY, 0)
 
     def find_device_name(self, key, default_value):
         """Find device or site name"""
@@ -97,18 +112,21 @@ class MyenergiClient:
 
     async def refresh(self):
         """Refresh device data"""
+        _LOGGER.debug("Refreshing data for all myenergi devices")
         data = await self.fetch_data()
         self._data = data["devices"]
         self._keys = data["keys"]
         for grp in self._data:
             key = list(grp.keys())[0]
             if key not in DEVICE_TYPES:
+                _LOGGER.debug(f"Unknown device type: {key}")
                 continue
             devices = grp[key]
             for device_data in devices:
                 serial = device_data.get("sno")
                 existing_device = self.devices.get(serial, None)
                 if existing_device is None:
+                    _LOGGER.debug(f"Adding device with serial {serial}")
                     device_obj = device_factory(
                         self._connection, key, serial, device_data
                     )
@@ -118,6 +136,7 @@ class MyenergiClient:
                     )
                     self.devices[serial] = device_obj
                 else:
+                    _LOGGER.debug(f"Updating {existing_device.kind} serial {serial}")
                     existing_device.data = device_data
 
     async def fetch_data(self):

@@ -1,0 +1,80 @@
+{
+  "keys": {
+    "H1234": [
+      { "key": "Z16042300", "val": "Test Zappi 1" },
+      { "key": "H10645200", "val": "Test Harvi 1" },
+      { "key": "siteName", "val": "Test Site" }
+    ]
+  },
+  "devices": [
+    {
+      "zappi": [
+        {
+          "dat": "25-08-2021",
+          "tim": "18:45:19",
+          "ectt1": "Internal Load",
+          "ectt2": "Generation",
+          "ectt3": "AC Battery",
+          "frq": 49.95,
+          "grd": 10000,
+          "gen": 5000,
+          "ectp1": 2000,
+          "ectp2": 5000,
+          "ectp3": 3000,
+          "pha": 1,
+          "sno": 16042300,
+          "sta": 1,
+          "vol": 2347,
+          "pri": 1,
+          "cmt": 254,
+          "zmo": 1,
+          "tbk": 5,
+          "che": 0.0,
+          "pst": "B2",
+          "mgl": 50,
+          "sbh": 17,
+          "sbk": 5,
+          "ectp4": -2,
+          "ectt4": "None",
+          "ectp5": -2,
+          "ectt5": "None",
+          "ectp6": -4,
+          "ectt6": "None",
+          "fwv": "3560S3.139",
+          "dst": 1,
+          "lck": 16,
+          "pwm": 2700,
+          "zs": 2306,
+          "rdc": 8,
+          "rac": 16,
+          "rrac": 4,
+          "zsh": 9,
+          "zsl": 2
+        }
+      ]
+    },
+    {
+      "harvi": [
+        {
+          "sno": 10645200,
+          "dat": "25-08-2021",
+          "tim": "17:54:59",
+          "ectp1": 10000,
+          "ectp2": 0,
+          "ectp3": 0,
+          "ectt1": "Grid",
+          "ectt2": "None",
+          "ectt3": "None",
+          "ect1p": 1,
+          "ect2p": 0,
+          "ect3p": 0,
+          "fwv": ""
+        }
+      ]
+    },
+    {
+      "asn": "s8.myenergi.net",
+      "fwv": "3401S3077"
+    }
+  ]
+}

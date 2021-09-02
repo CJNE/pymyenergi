@@ -1,5 +1,6 @@
 from pymyenergi.connection import Connection
 
+from . import HARVI
 from .base_device import BaseDevice
 
 
@@ -11,12 +12,12 @@ class Harvi(BaseDevice):
 
     async def fetch_data(self):
         response = await self._connection.get(f"/cgi-jstatus-H{self._serialno}")
-        data = response["harvi"][0]
+        data = response[HARVI][0]
         return data
 
     @property
     def kind(self):
-        return "harvi"
+        return HARVI
 
     @property
     def prefix(self):

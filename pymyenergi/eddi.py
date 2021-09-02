@@ -1,5 +1,6 @@
 from pymyenergi.connection import Connection
 
+from . import EDDI
 from .base_device import BaseDevice
 
 
@@ -10,13 +11,13 @@ class Eddi(BaseDevice):
         super().__init__(connection, serialno, data)
 
     async def fetch_data(self):
-        response = await self._connection.get(f"/cgi-jstatus-H{self._serialno}")
-        data = response["eddi"][0]
+        response = await self._connection.get(f"/cgi-jstatus-E{self._serialno}")
+        data = response[EDDI][0]
         return data
 
     @property
     def kind(self):
-        return "eddi"
+        return EDDI
 
     @property
     def prefix(self):
@@ -44,7 +45,7 @@ class Eddi(BaseDevice):
 
     async def stop(self):
         """Stop diverting"""
-        await self._connection.get(f"/cgi-zappi-mode-E{self._serialno}-0-0-0-0000")
+        await self._connection.get(f"/cgi-eddi-mode-E{self._serialno}-0-0-0-0000")
         return True
 
     def show(self):

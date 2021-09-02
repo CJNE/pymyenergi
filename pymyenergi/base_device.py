@@ -54,7 +54,7 @@ class BaseDevice(ABC):
         """Create a CT from data"""
         return CT(
             self._data.get(f"ectt{ct_number}", None),
-            self._data.get(f"ectp{ct_number}", 0),
+            self._data.get(f"ectp{ct_number}", None),
             self._data.get(f"ect{ct_number}p", None),
         )
 

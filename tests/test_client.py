@@ -47,3 +47,18 @@ async def test_get_harvi_devices(client_fetch_data_fixture):
     devices = await client.get_devices("harvi")
     assert len(devices) == 2
     assert isinstance(devices[1], Harvi)
+
+
+async def test_1p_harvi_eddi_solar_battery(client_1p_zappi_harvi_solar_battery_fixture):
+    client = MyenergiClient(conn)
+    devices = await client.get_devices("harvi")
+    assert len(devices) == 1
+    assert isinstance(devices[0], Harvi)
+    devices = await client.get_devices("zappi")
+    assert len(devices) == 1
+    assert isinstance(devices[0], Zappi)
+    assert client.power_grid == 10000
+    assert client.power_generation == 5000
+    assert client.power_battery == 3000
+    assert client.power_charging == 2000
+    assert client.consumption_home == 10000
