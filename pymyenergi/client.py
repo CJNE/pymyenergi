@@ -149,7 +149,6 @@ class MyenergiClient:
                 serial = device_data.get("sno")
                 existing_device = self.devices.get(serial, None)
                 if existing_device is None:
-                    _LOGGER.debug(f"Adding device with serial {serial}")
                     device_obj = device_factory(
                         self._connection, key, serial, device_data
                     )
@@ -157,9 +156,12 @@ class MyenergiClient:
                     device_obj.name = self.find_device_name(
                         serial_key, f"{device_obj.kind}-{device_obj.serial_number}"
                     )
+                    _LOGGER.debug(f"Adding {device_obj.kind} {device_obj.name}")
                     self.devices[serial] = device_obj
                 else:
-                    _LOGGER.debug(f"Updating {existing_device.kind} serial {serial}")
+                    _LOGGER.debug(
+                        f"Updating {existing_device.kind} {existing_device.name}"
+                    )
                     existing_device.data = device_data
 
     async def fetch_data(self):
