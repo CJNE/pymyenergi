@@ -41,7 +41,7 @@ class Zappi(BaseDevice):
 
     @property
     def charge_added(self):
-        """Charge added in kWh"""
+        """Charge added this session in kWh"""
         return self._data.get("che")
 
     @property

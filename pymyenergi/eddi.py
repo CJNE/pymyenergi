@@ -28,6 +28,11 @@ class Eddi(BaseDevice):
         return self._data.get("pha", 0)
 
     @property
+    def diverted_session(self):
+        """Energy diverted this session kWh"""
+        return self._data.get("che")
+
+    @property
     def power_grid(self):
         """Grid power in W"""
         return self._data.get("grd", 0)
