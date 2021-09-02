@@ -34,7 +34,11 @@ async def main(args):
             client = MyenergiClient(conn)
             devices = await client.get_devices()
             out = f"Site name: {client.site_name}\n"
-            out = out + f"Home consumption: {client.consumption_home}\n"
+            out = out + f"Home consumption : {client.consumption_home}W\n"
+            out = out + f"Power grid       : {client.power_grid}W\n"
+            out = out + f"Power generation : {client.power_generation}W\n"
+            out = out + f"Power EV charge  : {client.power_charging}W\n"
+            out = out + f"Power battery    : {client.power_battery}W\n"
             out = out + "Devices:\n"
             for device in devices:
                 out = out + f"  {device.kind.capitalize()}: {device.name}\n"

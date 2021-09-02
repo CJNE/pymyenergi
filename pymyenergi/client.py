@@ -56,11 +56,33 @@ class MyenergiClient:
         totals = {}
         zappi_or_eddi = None
         for device in devices:
-            totals[device.ct1.name] = totals.get(device.ct1.name, 0) + device.ct1.power
-            totals[device.ct2.name] = totals.get(device.ct2.name, 0) + device.ct2.power
-            totals[device.ct3.name] = totals.get(device.ct3.name, 0) + device.ct3.power
+            if device.ct1.is_assigned:
+                totals[device.ct1.name] = (
+                    totals.get(device.ct1.name, 0) + device.ct1.power
+                )
+            if device.ct2.is_assigned:
+                totals[device.ct2.name] = (
+                    totals.get(device.ct2.name, 0) + device.ct2.power
+                )
+            if device.ct3.is_assigned:
+                totals[device.ct3.name] = (
+                    totals.get(device.ct3.name, 0) + device.ct3.power
+                )
             if device.kind in [ZAPPI, EDDI]:
                 zappi_or_eddi = device
+                if device.kind == ZAPPI:
+                    if device.ct4.is_assigned:
+                        totals[device.ct4.name] = (
+                            totals.get(device.ct4.name, 0) + device.ct4.power
+                        )
+                    if device.ct5.is_assigned:
+                        totals[device.ct5.name] = (
+                            totals.get(device.ct5.name, 0) + device.ct5.power
+                        )
+                    if device.ct6.is_assigned:
+                        totals[device.ct6.name] = (
+                            totals.get(device.ct6.name, 0) + device.ct6.power
+                        )
 
         if totals.get(CT_GRID, 0) == 0 and zappi_or_eddi is not None:
             totals[CT_GRID] = zappi_or_eddi.power_grid

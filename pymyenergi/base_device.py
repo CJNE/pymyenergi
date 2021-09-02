@@ -7,7 +7,7 @@ from pymyenergi.connection import Connection
 class CT:
     """Current Transformer class"""
 
-    def __init__(self, name, value, phase=None) -> None:
+    def __init__(self, name, value=0, phase=None) -> None:
         self._name = name
         self._value = value
         self._phase = phase
@@ -26,6 +26,11 @@ class CT:
     def phase(self):
         """What phase the CT is assigned to"""
         return self._phase
+
+    @property
+    def is_assigned(self):
+        """Is the CT assigned?"""
+        return self.name != "None"
 
     @property
     def is_generation(self):
@@ -53,8 +58,8 @@ class BaseDevice(ABC):
     def _create_ct(self, ct_number):
         """Create a CT from data"""
         return CT(
-            self._data.get(f"ectt{ct_number}", None),
-            self._data.get(f"ectp{ct_number}", None),
+            self._data.get(f"ectt{ct_number}", "None"),
+            self._data.get(f"ectp{ct_number}", 0),
             self._data.get(f"ect{ct_number}p", None),
         )
 
