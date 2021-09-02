@@ -99,7 +99,7 @@ class MyenergiClient:
         return (
             totals.get(CT_GENERATION, 0)
             + totals.get(CT_GRID, 0)
-            - totals.get(CT_BATTERY, 0)
+            + totals.get(CT_BATTERY, 0)
             - totals.get(CT_LOAD, 0)
         )
 
@@ -141,7 +141,8 @@ class MyenergiClient:
         for grp in self._data:
             key = list(grp.keys())[0]
             if key not in DEVICE_TYPES:
-                _LOGGER.debug(f"Unknown device type: {key}")
+                if key != "asn":
+                    _LOGGER.debug(f"Unknown device type: {key}")
                 continue
             devices = grp[key]
             for device_data in devices:

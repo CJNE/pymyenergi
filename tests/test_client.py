@@ -61,4 +61,4 @@ async def test_1p_harvi_eddi_solar_battery(client_1p_zappi_harvi_solar_battery_f
     assert client.power_generation == 5000
     assert client.power_battery == 3000
     assert client.power_charging == 2000
-    assert client.consumption_home == 10000
+    assert client.consumption_home == 16000
