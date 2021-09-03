@@ -220,6 +220,8 @@ class Zappi(BaseDevice):
         await self._connection.get(
             f"/cgi-zappi-mode-Z{self._serialno}-{mode_int}-0-0-0000"
         )
+        # Set local data if successful
+        self._data["zmo"] = mode_int
         return True
 
     async def start_boost(self, amount):
