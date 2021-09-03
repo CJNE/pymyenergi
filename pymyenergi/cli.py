@@ -60,6 +60,11 @@ async def main(args):
                     sys.exit(f"A mode must be specifed, one of {modes}")
                 await device.set_charge_mode(args.arg[0])
                 print(f"Charging was set to {args.arg[0].capitalize()}")
+            elif args.action == "mingreen":
+                if len(args.arg) < 1:
+                    sys.exit("A minimum green level must be provided")
+                await device.set_minimum_green_level(args.arg[0])
+                print(f"Minimum green level was set to {args.arg[0]}")
             elif args.action == "boost":
                 await device.start_boost(args.arg[0])
                 print(f"Start boosting with {args.arg[0]}kWh")
@@ -87,7 +92,7 @@ def cli():
     subparser_zappi = subparsers.add_parser("zappi", help="zappi help")
     subparser_zappi.add_argument("serial", default=None)
     subparser_zappi.add_argument(
-        "action", choices=["show", "stop", "mode", "boost", "smart-boost"]
+        "action", choices=["show", "stop", "mode", "boost", "smart-boost", "mingreen"]
     )
     subparser_zappi.add_argument("arg", nargs="*")
 

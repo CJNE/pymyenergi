@@ -224,6 +224,13 @@ class Zappi(BaseDevice):
         self._data["zmo"] = mode_int
         return True
 
+    async def set_minimum_green_level(self, level):
+        """Set minimum green level 0-100"""
+        await self._connection.get(f"/cgi-set-min-green-Z{self._serialno}-{level}")
+        # Set local data if successful
+        self._data["mgl"] = level
+        return True
+
     async def start_boost(self, amount):
         """Start boost"""
         await self._connection.get(
