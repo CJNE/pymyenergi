@@ -4,6 +4,9 @@ from . import EDDI
 from .base_device import BaseDevice
 
 
+STATES = ["Unkn0", "Paused", "Unkn2", "Diverting", "Boosting", "Completed", "Stopped"]
+
+
 class Eddi(BaseDevice):
     """Eddi Client for myenergi API."""
 
@@ -27,6 +30,11 @@ class Eddi(BaseDevice):
     def l1_phase(self):
         """What phase L1 is connected to"""
         return self._data.get("pha", 0)
+
+    @property
+    def status(self):
+        """Current status, one of Paused, Charging or Completed"""
+        return STATES[self._data.get("sta", 1)]
 
     @property
     def diverted_session(self):
