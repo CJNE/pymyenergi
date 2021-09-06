@@ -21,12 +21,6 @@ class Zappi(BaseDevice):
     def __init__(self, connection: Connection, serialno, data=None) -> None:
         super().__init__(connection, serialno, data)
 
-    async def fetch_data(self):
-        """Fetch data from myenergi"""
-        response = await self._connection.get(f"/cgi-jstatus-Z{self._serialno}")
-        data = response[ZAPPI][0]
-        return data
-
     @property
     def kind(self):
         return ZAPPI
@@ -49,6 +43,11 @@ class Zappi(BaseDevice):
     def is_dst(self):
         """Is DST in use"""
         return self._data.get("dat") == 1
+
+    @property
+    def ct3(self):
+        """Current transformer 3"""
+        return self._create_ct(3)
 
     @property
     def ct4(self):

@@ -10,14 +10,14 @@ class Harvi(BaseDevice):
     def __init__(self, connection: Connection, serialno, data={}) -> None:
         super().__init__(connection, serialno, data)
 
-    async def fetch_data(self):
-        response = await self._connection.get(f"/cgi-jstatus-H{self._serialno}")
-        data = response[HARVI][0]
-        return data
-
     @property
     def kind(self):
         return HARVI
+
+    @property
+    def ct3(self):
+        """Current transformer 3"""
+        return self._create_ct(3)
 
     @property
     def prefix(self):

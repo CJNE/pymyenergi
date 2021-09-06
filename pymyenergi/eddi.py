@@ -13,11 +13,6 @@ class Eddi(BaseDevice):
     def __init__(self, connection: Connection, serialno, data={}) -> None:
         super().__init__(connection, serialno, data)
 
-    async def fetch_data(self):
-        response = await self._connection.get(f"/cgi-jstatus-E{self._serialno}")
-        data = response[EDDI][0]
-        return data
-
     @property
     def kind(self):
         return EDDI
@@ -66,5 +61,4 @@ class Eddi(BaseDevice):
         ret = ret + f"S/N {self.serial_number} version {self.firmware_version}\n\n"
         ret = ret + f"CT 1 {self.ct1.name} {self.ct1.power}W\n"
         ret = ret + f"CT 2 {self.ct2.name} {self.ct2.power}W\n"
-        ret = ret + f"CT 3 {self.ct3.name} {self.ct3.power}W\n"
         return ret

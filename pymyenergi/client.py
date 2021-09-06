@@ -1,4 +1,6 @@
 import logging
+from datetime import datetime
+from datetime import timezone
 
 from pymyenergi.connection import Connection
 
@@ -9,6 +11,7 @@ from . import CT_LOAD
 from . import DEVICE_TYPES
 from . import EDDI
 from . import HARVI
+from . import HOUR
 from . import ZAPPI
 from .eddi import Eddi
 from .harvi import Harvi
@@ -50,7 +53,25 @@ class MyenergiClient:
         """Hub serial number"""
         return self._connection.username
 
-    def get_totals(self):
+    def get_energy_totals(self):
+        """Get total energy"""
+        devices = self.get_devices_sync()
+        keys = ["generated", "grid_import", "grid_export"]
+        totals = {"diverted": 0}
+        for key in keys:
+            totals[key] = 0
+        for device in devices:
+            if device.kind == HARVI:
+                continue
+            for key in keys:
+                if totals[key] == 0:
+                    totals[key] = device.history_data[key]
+            totals["diverted"] = (
+                totals.get("diverted", 0) + device.history_data["device_diverted"]
+            )
+        return totals
+
+    def get_power_totals(self):
         """Get totals for all supported CT types"""
         devices = self.get_devices_sync()
         totals = {}
@@ -95,7 +116,7 @@ class MyenergiClient:
     def consumption_home(self):
         """Calculates home power"""
         # calculation is all generation + grid + battery - device consumption
-        totals = self.get_totals()
+        totals = self.get_power_totals()
         return (
             totals.get(CT_GENERATION, 0)
             + totals.get(CT_GRID, 0)
@@ -104,27 +125,51 @@ class MyenergiClient:
         )
 
     @property
+    def energy_imported(self):
+        """Grid imported energy"""
+        energy_totals = self.get_energy_totals()
+        return energy_totals.get("grid_import", 0)
+
+    @property
+    def energy_exported(self):
+        """Grid exported energy"""
+        energy_totals = self.get_energy_totals()
+        return energy_totals.get("grid_import", 0)
+
+    @property
+    def energy_generated(self):
+        """Generated energy"""
+        energy_totals = self.get_energy_totals()
+        return energy_totals.get("generated", 0)
+
+    @property
+    def energy_diverted(self):
+        """Diverted energy"""
+        energy_totals = self.get_energy_totals()
+        return energy_totals.get("diverted", 0)
+
+    @property
     def power_grid(self):
         """Grid total power"""
-        totals = self.get_totals()
+        totals = self.get_power_totals()
         return totals.get(CT_GRID, 0)
 
     @property
     def power_generation(self):
         """Generation total power"""
-        totals = self.get_totals()
+        totals = self.get_power_totals()
         return totals.get(CT_GENERATION, 0)
 
     @property
     def power_charging(self):
         """Chargers total power"""
-        totals = self.get_totals()
+        totals = self.get_power_totals()
         return totals.get(CT_LOAD, 0)
 
     @property
     def power_battery(self):
-        """Chargers total power"""
-        totals = self.get_totals()
+        """Battery total power"""
+        totals = self.get_power_totals()
         return totals.get(CT_BATTERY, 0)
 
     def find_device_name(self, key, default_value):
@@ -164,6 +209,19 @@ class MyenergiClient:
                     )
                     existing_device.data = device_data
 
+    async def refresh_history_today(self):
+        today = datetime.now(timezone.utc)
+        today = today.replace(hour=0, minute=0, second=0, microsecond=0)
+        return await self.refresh_history(today, 24, HOUR)
+
+    async def refresh_history(self, from_date, how_long, resolution):
+        """Refresh history data for eddi and zappi"""
+        devices = await self.get_devices("all", False)
+        for device in devices:
+            if device.kind == HARVI:
+                continue
+            await device.refresh_history_data(from_date, how_long, resolution)
+
     async def fetch_data(self):
         """Fetch data from myenergi"""
         keys = self._keys
@@ -175,7 +233,7 @@ class MyenergiClient:
 
     async def get_devices(self, kind="all", refresh=True):
         """Fetch devices, all or of a specific kind"""
-        if refresh:
+        if refresh or not self.devices:
             await self.refresh()
         return self.get_devices_sync(kind)
 
