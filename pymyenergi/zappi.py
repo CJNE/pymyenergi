@@ -19,6 +19,7 @@ class Zappi(BaseDevice):
     """Zappi Client for myenergi API."""
 
     def __init__(self, connection: Connection, serialno, data=None) -> None:
+        self.history_data = {}
         super().__init__(connection, serialno, data)
 
     @property

@@ -129,7 +129,7 @@ class BaseDevice(ABC):
             url = f"/cgi-jday-{self.prefix}{self._serialno}-{date_from.year}-{date_from.month}-{date_from.day}-{date_from.hour}-0-{how_long}"
         else:
             url = f"/cgi-jdayhour-{self.prefix}{self._serialno}-{date_from.year}-{date_from.month}-{date_from.day}-{date_from.hour}-{how_long}"
-        _LOGGER.debug("Fetching {resolution) history data for {self.kind}")
+        _LOGGER.debug(f"Fetching {resolution} history data for {self.kind}")
         data = await self._connection.get(url)
         data = data[f"U{self.serial_number}"]
 
@@ -143,18 +143,22 @@ class BaseDevice(ABC):
                     watt_hours = row.get(key, 0) / 3600
                 energy_wh[key] = energy_wh[key] + watt_hours
         return_data = {
-            "generated": energy_wh["gep"],
-            "grid_import": energy_wh["imp"],
-            "grid_export": energy_wh["exp"],
-            "device_total": energy_wh["h1b"] + energy_wh["h2b"] + energy_wh["h3b"],
-            "device_diverted": energy_wh["h1d"] + energy_wh["h2d"] + energy_wh["h3d"],
+            "generated": round(energy_wh["gep"]),
+            "grid_import": round(energy_wh["imp"]),
+            "grid_export": round(energy_wh["exp"]),
+            "device_total": round(
+                energy_wh["h1b"] + energy_wh["h2b"] + energy_wh["h3b"]
+            ),
+            "device_diverted": round(
+                energy_wh["h1d"] + energy_wh["h2d"] + energy_wh["h3d"]
+            ),
         }
         for i in range(6):
             key = f"ct{i+1}"
             if hasattr(self, key):
                 ct_key = getattr(self, key).name_as_key
                 if ct_key != "ct_none":
-                    return_data[ct_key] = (
+                    return_data[ct_key] = round(
                         return_data.get(ct_key, 0) + energy_wh[f"ct{i+1}"]
                     )
         return return_data

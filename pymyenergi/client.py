@@ -65,9 +65,9 @@ class MyenergiClient:
                 continue
             for key in keys:
                 if totals[key] == 0:
-                    totals[key] = device.history_data[key]
-            totals["diverted"] = (
-                totals.get("diverted", 0) + device.history_data["device_diverted"]
+                    totals[key] = device.history_data.get(key, 0)
+            totals["diverted"] = totals.get("diverted", 0) + device.history_data.get(
+                "device_diverted", 0
             )
         return totals
 
@@ -134,7 +134,7 @@ class MyenergiClient:
     def energy_exported(self):
         """Grid exported energy"""
         energy_totals = self.get_energy_totals()
-        return energy_totals.get("grid_import", 0)
+        return energy_totals.get("grid_export", 0)
 
     @property
     def energy_generated(self):
