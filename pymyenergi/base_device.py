@@ -99,7 +99,7 @@ class BaseDevice(ABC):
     async def history_energy_minutes(self, date_from, how_long=1440):
         if date_from is None:
             date_from = datetime.now(timezone.utc) - timedelta(minutes=how_long)
-        return await self.fetch_history_energy_data(date_from, how_long, MINUTE)
+        return await self.fetch_history_data(date_from, how_long, MINUTE)
 
     async def history_energy_hours(self, date_from, how_long=24):
         if date_from is None:
