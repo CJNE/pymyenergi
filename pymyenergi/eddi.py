@@ -47,6 +47,16 @@ class Eddi(BaseDevice):
         """Generated power in W"""
         return self._data.get("gen", 0)
 
+    @property
+    def energy_total(self):
+        """Device total energy from history data"""
+        return self.history_data.get("device_total", 0)
+
+    @property
+    def energy_diverted(self):
+        """Device diverted energy from history data"""
+        return self.history_data.get("device_diverted", 0)
+
     async def stop(self):
         """Stop diverting"""
         await self._connection.get(f"/cgi-eddi-mode-E{self._serialno}-0-0-0-0000")

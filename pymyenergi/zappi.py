@@ -150,6 +150,16 @@ class Zappi(BaseDevice):
         """Smart boost amount of energy to add"""
         return self._data.get("sbk", -1)
 
+    @property
+    def energy_total(self):
+        """Device total energy from history data"""
+        return self.history_data.get("device_total", 0)
+
+    @property
+    def energy_diverted(self):
+        """Device diverted energy from history data"""
+        return self.history_data.get("device_diverted", 0)
+
     # @property
     # def boost_start_hour(self):
     #     """Boost starting at hour ??"""

@@ -11,6 +11,8 @@ from pymyenergi.connection import Connection
 from pymyenergi.exceptions import WrongCredentials
 from pymyenergi.zappi import CHARGE_MODES
 
+from . import HARVI
+
 logging.basicConfig()
 logging.root.setLevel(logging.WARNING)
 
@@ -46,11 +48,11 @@ async def main(args):
             out = out + f"Energy diverted  : {client.energy_diverted/1000:.2f}kWh\n"
             out = out + "Devices:\n"
             for device in devices:
-                out = out + f"  {device.kind.capitalize()}: {device.name}\n"
+                out = out + f"  {device.kind.capitalize()}: {device.name}"
+                if device.kind != HARVI:
+                    out = out + f"\t{device.energy_total}Wh today"
+                out = out + "\n"
             print(out)
-            await client.refresh_history_today()
-            energy = client.get_energy_totals()
-            print(energy)
         elif args.command in ["zappi", "eddi", "harvi"]:
             device = device_factory(conn, args.command, args.serial)
             await device.refresh()
