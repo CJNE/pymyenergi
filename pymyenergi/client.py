@@ -85,11 +85,15 @@ class MyenergiClient:
                 totals[device.ct2.name] = (
                     totals.get(device.ct2.name, 0) + device.ct2.power
                 )
-            if device.ct3.is_assigned:
-                totals[device.ct3.name] = (
-                    totals.get(device.ct3.name, 0) + device.ct3.power
-                )
-            if device.kind in [ZAPPI, EDDI]:
+
+            if device.kind in [ZAPPI, HARVI]:
+                if device.ct3.is_assigned:
+                    totals[device.ct3.name] = (
+                        totals.get(device.ct3.name, 0) + device.ct3.power
+                    )
+            if device.kind == EDDI:
+                zappi_or_eddi = device
+            if device.kind == ZAPPI:
                 zappi_or_eddi = device
                 if device.kind == ZAPPI:
                     if device.ct4.is_assigned:
