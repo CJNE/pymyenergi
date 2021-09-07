@@ -1,7 +1,9 @@
 import argparse
 import asyncio
+import configparser
 import json
 import logging
+import os
 import sys
 from getpass import getpass
 
@@ -98,35 +100,52 @@ async def main(args):
                     f"Start smart boosting with {args.arg[0]}kWh complete by {args.arg[1]}"
                 )
         else:
-            sys.exit("A serial number is needed")
+            sys.exit(
+                "Dont know what to do, type myenergi --help form available commands"
+            )
     except WrongCredentials:
         sys.exit("Wrong username or password")
 
 
 def cli():
+    config = configparser.ConfigParser()
+    config["hub"] = {"serial": "", "password": ""}
+    config.read([".myenergi.cfg", os.path.expanduser("~/.myenergi.cfg")])
     parser = argparse.ArgumentParser(prog="myenergi", description="myenergi CLI.")
-    parser.add_argument("-u", "--username", dest="username", default=None)
-    parser.add_argument("-p", "--password", dest="password", default=None)
+    parser.add_argument(
+        "-u",
+        "--username",
+        dest="username",
+        default=config.get("hub", "serial"),
+    )
+    parser.add_argument(
+        "-p", "--password", dest="password", default=config.get("hub", "password")
+    )
     parser.add_argument("-d", "--debug", dest="debug", action="store_true")
     parser.add_argument("-j", "--json", dest="json", action="store_true", default=False)
     subparsers = parser.add_subparsers(dest="command", help="sub-command help")
-    subparser_list = subparsers.add_parser("list", help="list help")
+    subparser_list = subparsers.add_parser("list", help="list devices")
     subparser_list.add_argument("-k", "--kind", dest="kind", default="all")
-    subparsers.add_parser("overview", help="overview help")
-    subparsers.add_parser("energy", help="energy help")
-    subparser_zappi = subparsers.add_parser("zappi", help="zappi help")
+    subparsers.add_parser("overview", help="show overview")
+    subparser_zappi = subparsers.add_parser(
+        "zappi", help="use zappi --help for available commands"
+    )
     subparser_zappi.add_argument("serial", default=None)
     subparser_zappi.add_argument(
         "action",
         choices=["show", "energy", "stop", "mode", "boost", "smart-boost", "mingreen"],
     )
     subparser_zappi.add_argument("arg", nargs="*")
-    subparser_eddi = subparsers.add_parser("eddi", help="eddi help")
+    subparser_eddi = subparsers.add_parser(
+        "eddi", help="use eddi --help for available commands"
+    )
     subparser_eddi.add_argument("serial", default=None)
     subparser_eddi.add_argument("action", choices=["show", "energy"])
     subparser_eddi.add_argument("arg", nargs="*")
 
-    subparser_harvi = subparsers.add_parser("harvi", help="harvi help")
+    subparser_harvi = subparsers.add_parser(
+        "harvi", help="use harvi --help for available commands"
+    )
     subparser_harvi.add_argument("serial", default=None)
     subparser_harvi.add_argument("action", choices=["show"])
     subparser_harvi.add_argument("arg", nargs="*")

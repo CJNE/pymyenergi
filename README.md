@@ -22,26 +22,44 @@ pip install pymyenergi -U
 
 Setup will add a cli under the name myenergicli, see below for usage
 
-## CLI usage
+## CLI
 
 A simple cli is provided with this library.
 
-If no username or password is supplied as input arguments you will be prompted.
+If no username or password is supplied as input arguments and no configuration file is found you will be prompted.
+Conifguration file will be searched for in ./.myenergi.cfg and ~/.myenergi.cfg
+
+### Example configuration file
 
 ```
-usage: cli.py [-h] [-u USERNAME] [-p PASSWORD] [-k KIND] [-d] {list}
+[hub]
+serial=12345678
+password=yourpassword
+```
+
+### CLI usage
+
+```
+usage: myenergi [-h] [-u USERNAME] [-p PASSWORD] [-d] [-j]
+                {list,overview,zappi,eddi,harvi} ...
 
 myenergi CLI.
 
 positional arguments:
-  {list}
+  {list,overview,zappi,eddi,harvi}
+                        sub-command help
+    list                list devices
+    overview            show overview
+    zappi               use zappi --help for available commands
+    eddi                use eddi --help for available commands
+    harvi               use harvi --help for available commands
 
 optional arguments:
   -h, --help            show this help message and exit
   -u USERNAME, --username USERNAME
   -p PASSWORD, --password PASSWORD
-  -k KIND, --kind KIND
   -d, --debug
+  -j, --json
 ```
 
 ## Library usage
