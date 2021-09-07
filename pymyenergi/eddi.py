@@ -23,6 +23,17 @@ class Eddi(BaseDevice):
         return "E"
 
     @property
+    def ct_keys(self):
+        """Return CT key names that are not none"""
+        keys = {}
+        for i in range(2):
+            ct = getattr(self, f"ct{i+1}")
+            if ct.name_as_key == "ct_none":
+                continue
+            keys[ct.name_as_key] = keys.get(ct.name_as_key, 0) + 1
+        return keys
+
+    @property
     def l1_phase(self):
         """What phase L1 is connected to"""
         return self._data.get("pha", 0)
@@ -72,4 +83,6 @@ class Eddi(BaseDevice):
         ret = ret + f"S/N {self.serial_number} version {self.firmware_version}\n\n"
         ret = ret + f"CT 1 {self.ct1.name} {self.ct1.power}W\n"
         ret = ret + f"CT 2 {self.ct2.name} {self.ct2.power}W\n"
+        for key in self.ct_keys:
+            ret = ret + f"Energy {key} {self.history_data.get(key, 0)}Wh\n"
         return ret

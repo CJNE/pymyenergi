@@ -15,6 +15,17 @@ class Harvi(BaseDevice):
         return HARVI
 
     @property
+    def ct_keys(self):
+        """Return CT key names that are not none"""
+        keys = {}
+        for i in range(3):
+            ct = getattr(self, f"ct{i+1}")
+            if ct.name_as_key == "ct_none":
+                continue
+            keys[ct.name_as_key] = keys.get(ct.name_as_key, 0) + 1
+        return keys
+
+    @property
     def ct3(self):
         """Current transformer 3"""
         return self._create_ct(3)

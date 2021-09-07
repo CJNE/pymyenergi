@@ -31,6 +31,17 @@ class Zappi(BaseDevice):
         return "Z"
 
     @property
+    def ct_keys(self):
+        """Return CT key names that are not none"""
+        keys = {}
+        for i in range(6):
+            ct = getattr(self, f"ct{i+1}")
+            if ct.name_as_key == "ct_none":
+                continue
+            keys[ct.name_as_key] = keys.get(ct.name_as_key, 0) + 1
+        return keys
+
+    @property
     def charge_mode(self):
         """Charge mode, one of Fast, Eco, Eco+ and Stopped"""
         return CHARGE_MODES[self._data.get("zmo", 0)]
@@ -211,6 +222,9 @@ class Zappi(BaseDevice):
         ret = ret + "Power:\n"
         ret = ret + f"  Grid      : {self.power_grid}W\n"
         ret = ret + f"  Generated : {self.power_generated}W\n"
+        ret = ret + "\n"
+        for key in self.ct_keys:
+            ret = ret + f"Energy {key} {self.history_data.get(key, 0)}Wh\n"
         ret = ret + "\n"
         ret = ret + f"Boost with {self.boost_amount}kWh\n"
         ret = ret + "Smart Boost start at"
