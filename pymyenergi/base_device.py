@@ -143,14 +143,14 @@ class BaseDevice(ABC):
                     watt_hours = row.get(key, 0) / 3600
                 energy_wh[key] = energy_wh[key] + watt_hours
         return_data = {
-            "generated": round(energy_wh["gep"]),
-            "grid_import": round(energy_wh["imp"]),
-            "grid_export": round(energy_wh["exp"]),
+            "generated": round(energy_wh["gep"] / 1000, 2),
+            "grid_import": round(energy_wh["imp"] / 1000, 2),
+            "grid_export": round(energy_wh["exp"] / 1000, 2),
             "device_total": round(
-                energy_wh["h1b"] + energy_wh["h2b"] + energy_wh["h3b"]
+                (energy_wh["h1b"] + energy_wh["h2b"] + energy_wh["h3b"]) / 1000, 2
             ),
             "device_diverted": round(
-                energy_wh["h1d"] + energy_wh["h2d"] + energy_wh["h3d"]
+                (energy_wh["h1d"] + energy_wh["h2d"] + energy_wh["h3d"]) / 1000, 2
             ),
         }
         for i in range(6):
@@ -159,7 +159,7 @@ class BaseDevice(ABC):
                 ct_key = getattr(self, key).name_as_key
                 if ct_key != "ct_none":
                     return_data[ct_key] = round(
-                        return_data.get(ct_key, 0) + energy_wh[f"ct{i+1}"]
+                        (return_data.get(ct_key, 0) + (energy_wh[f"ct{i+1}"] / 1000)), 2
                     )
         return return_data
 
