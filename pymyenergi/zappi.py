@@ -167,9 +167,9 @@ class Zappi(BaseDevice):
         return self.history_data.get("device_total", 0)
 
     @property
-    def energy_diverted(self):
-        """Device diverted energy from history data"""
-        return self.history_data.get("device_diverted", 0)
+    def energy_green(self):
+        """Device green energy from history data"""
+        return self.history_data.get("device_green", 0)
 
     # @property
     # def boost_start_hour(self):

@@ -57,7 +57,7 @@ class MyenergiClient:
         """Get total energy"""
         devices = self.get_devices_sync()
         keys = ["generated", "grid_import", "grid_export"]
-        totals = {"diverted": 0}
+        totals = {"green": 0}
         for key in keys:
             totals[key] = 0
         for device in devices:
@@ -66,8 +66,8 @@ class MyenergiClient:
             for key in keys:
                 if totals[key] == 0:
                     totals[key] = device.history_data.get(key, 0)
-            totals["diverted"] = totals.get("diverted", 0) + device.history_data.get(
-                "device_diverted", 0
+            totals["green"] = totals.get("green", 0) + device.history_data.get(
+                "device_green", 0
             )
         return totals
 
@@ -147,10 +147,10 @@ class MyenergiClient:
         return energy_totals.get("generated", 0)
 
     @property
-    def energy_diverted(self):
-        """Diverted energy"""
+    def energy_green(self):
+        """Green energy"""
         energy_totals = self.get_energy_totals()
-        return energy_totals.get("diverted", 0)
+        return energy_totals.get("green", 0)
 
     @property
     def power_grid(self):

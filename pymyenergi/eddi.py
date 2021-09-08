@@ -44,7 +44,7 @@ class Eddi(BaseDevice):
         return STATES[self._data.get("sta", 1)]
 
     @property
-    def diverted_session(self):
+    def consumed_session(self):
         """Energy diverted this session kWh"""
         return self._data.get("che")
 
@@ -64,9 +64,9 @@ class Eddi(BaseDevice):
         return self.history_data.get("device_total", 0)
 
     @property
-    def energy_diverted(self):
-        """Device diverted energy from history data"""
-        return self.history_data.get("device_diverted", 0)
+    def energy_green(self):
+        """Device green energy from history data"""
+        return self.history_data.get("device_green", 0)
 
     async def stop(self):
         """Stop diverting"""

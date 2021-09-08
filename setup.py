@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name="pymyenergi",
-    version="0.0.13",
+    version="0.0.14",
     author="Johan Isaksson",
     author_email="johan@generatorhallen.se",
     description="Python library and CLI for communicating with myenergi API.",

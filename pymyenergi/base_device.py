@@ -63,6 +63,8 @@ class BaseDevice(ABC):
         self._serialno = serialno
         self._data = data or {}
         self._name = None
+        self.ct_groups = {}
+        self.refresh_ct_groups()
 
     @property
     @abstractmethod
@@ -149,7 +151,7 @@ class BaseDevice(ABC):
             "device_total": round(
                 (energy_wh["h1b"] + energy_wh["h2b"] + energy_wh["h3b"]) / 1000, 2
             ),
-            "device_diverted": round(
+            "device_green": round(
                 (energy_wh["h1d"] + energy_wh["h2d"] + energy_wh["h3d"]) / 1000, 2
             ),
         }
@@ -207,10 +209,21 @@ class BaseDevice(ABC):
         """All device data"""
         return self._data
 
+    def refresh_ct_groups(self):
+        groups = {}
+        for i in range(6):
+            key = f"ct{i+1}"
+            if hasattr(self, key):
+                ct = getattr(self, key)
+                if ct.name_as_key != "ct_none":
+                    groups[ct.name_as_key] = groups.get(ct.name_as_key, 0) + ct.power
+        self.ct_groups = groups
+
     @data.setter
     def data(self, value):
         """Set all device data"""
         self._data = value
+        self.refresh_ct_groups()
 
     async def refresh_history_data(self, from_date, how_long, resolution):
         """Refresh device history data"""

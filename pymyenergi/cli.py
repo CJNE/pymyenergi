@@ -47,7 +47,7 @@ async def main(args):
             out = out + f"Energy imported  : {client.energy_imported}kWh\n"
             out = out + f"Energy exported  : {client.energy_exported}kWh\n"
             out = out + f"Energy generated : {client.energy_generated}kWh\n"
-            out = out + f"Energy diverted  : {client.energy_diverted}kWh\n"
+            out = out + f"Energy green     : {client.energy_green}kWh\n"
             out = out + "Devices:\n"
             for device in devices:
                 out = out + f"\t{device.kind.capitalize()}: {device.name}"
