@@ -44,6 +44,8 @@ async def main(args):
             out = out + f"Power generation : {client.power_generation}W\n"
             out = out + f"Power EV charge  : {client.power_charging}W\n"
             out = out + f"Power battery    : {client.power_battery}W\n"
+            out = out + f"Grid voltage     : {client.voltage_grid}V\n"
+            out = out + f"Grid frequency   : {client.frequency_grid}Hz\n"
             out = out + f"Energy imported  : {client.energy_imported}kWh\n"
             out = out + f"Energy exported  : {client.energy_exported}kWh\n"
             out = out + f"Energy generated : {client.energy_generated}kWh\n"

@@ -10,8 +10,10 @@ from . import CT_GRID
 from . import CT_LOAD
 from . import DEVICE_TYPES
 from . import EDDI
+from . import FREQUENCY_GRID
 from . import HARVI
 from . import HOUR
+from . import VOLTAGE_GRID
 from . import ZAPPI
 from .eddi import Eddi
 from .harvi import Harvi
@@ -42,6 +44,8 @@ class MyenergiClient:
         self.devices = {}
         self._data = []
         self._keys = None
+        self._totals = {}
+        self._history_totals = {}
 
     @property
     def site_name(self):
@@ -53,43 +57,47 @@ class MyenergiClient:
         """Hub serial number"""
         return self._connection.username
 
-    def get_energy_totals(self):
-        """Get total energy"""
+    def _calculate_history_totals(self):
+        """Caluclate history data totals"""
         devices = self.get_devices_sync()
-        keys = ["generated", "grid_import", "grid_export"]
-        totals = {"green": 0}
-        for key in keys:
-            totals[key] = 0
-        for device in devices:
-            if device.kind == HARVI:
-                continue
-            for key in keys:
-                if totals[key] == 0:
-                    totals[key] = device.history_data.get(key, 0)
-            totals["green"] = totals.get("green", 0) + device.history_data.get(
-                "device_green", 0
-            )
-        return totals
-
-    def get_power_totals(self):
-        """Get totals for all supported CT types"""
-        devices = self.get_devices_sync()
-        totals = {}
+        energy_keys = ["generated", "grid_import", "grid_export"]
+        self._history_totals = {"green": 0}
+        for key in energy_keys:
+            self._history_totals[key] = 0
         zappi_or_eddi = None
         for device in devices:
+            if device.kind == ZAPPI or device.kind == EDDI:
+                zappi_or_eddi = device
+                break
+        if zappi_or_eddi is not None:
+            for key in energy_keys:
+                if self._history_totals[key] == 0:
+                    self._history_totals[key] = zappi_or_eddi.history_data.get(key, 0)
+            self._history_totals["green"] = self._history_totals.get(
+                "green", 0
+            ) + zappi_or_eddi.history_data.get("device_green", 0)
+
+    def _calculate_totals(self):
+        """Calculate current data totals"""
+        devices = self.get_devices_sync()
+        self._totals = {}
+        zappi_or_eddi = None
+        self._totals[CT_GRID] = 0
+        self._totals[CT_GENERATION] = 0
+        for device in devices:
             if device.ct1.is_assigned:
-                totals[device.ct1.name] = (
-                    totals.get(device.ct1.name, 0) + device.ct1.power
+                self._totals[device.ct1.name] = (
+                    self._totals.get(device.ct1.name, 0) + device.ct1.power
                 )
             if device.ct2.is_assigned:
-                totals[device.ct2.name] = (
-                    totals.get(device.ct2.name, 0) + device.ct2.power
+                self._totals[device.ct2.name] = (
+                    self._totals.get(device.ct2.name, 0) + device.ct2.power
                 )
 
             if device.kind in [ZAPPI, HARVI]:
                 if device.ct3.is_assigned:
-                    totals[device.ct3.name] = (
-                        totals.get(device.ct3.name, 0) + device.ct3.power
+                    self._totals[device.ct3.name] = (
+                        self._totals.get(device.ct3.name, 0) + device.ct3.power
                     )
             if device.kind == EDDI:
                 zappi_or_eddi = device
@@ -97,84 +105,86 @@ class MyenergiClient:
                 zappi_or_eddi = device
                 if device.kind == ZAPPI:
                     if device.ct4.is_assigned:
-                        totals[device.ct4.name] = (
-                            totals.get(device.ct4.name, 0) + device.ct4.power
+                        self._totals[device.ct4.name] = (
+                            self._totals.get(device.ct4.name, 0) + device.ct4.power
                         )
                     if device.ct5.is_assigned:
-                        totals[device.ct5.name] = (
-                            totals.get(device.ct5.name, 0) + device.ct5.power
+                        self._totals[device.ct5.name] = (
+                            self._totals.get(device.ct5.name, 0) + device.ct5.power
                         )
                     if device.ct6.is_assigned:
-                        totals[device.ct6.name] = (
-                            totals.get(device.ct6.name, 0) + device.ct6.power
+                        self._totals[device.ct6.name] = (
+                            self._totals.get(device.ct6.name, 0) + device.ct6.power
                         )
 
-        if totals.get(CT_GRID, 0) == 0 and zappi_or_eddi is not None:
-            totals[CT_GRID] = zappi_or_eddi.power_grid
-        if totals.get(CT_GENERATION, 0) == 0 and zappi_or_eddi is not None:
-            totals[CT_GENERATION] = zappi_or_eddi.power_generated
-
-        return totals
+        if zappi_or_eddi is not None:
+            self._totals[FREQUENCY_GRID] = zappi_or_eddi.supply_frequency
+            self._totals[VOLTAGE_GRID] = zappi_or_eddi.supply_voltage
+        if self._totals.get(CT_GRID, 0) == 0 and zappi_or_eddi is not None:
+            self._totals[CT_GRID] = zappi_or_eddi.power_grid
+        if self._totals.get(CT_GENERATION, 0) == 0 and zappi_or_eddi is not None:
+            self._totals[CT_GENERATION] = zappi_or_eddi.power_generated
 
     @property
     def consumption_home(self):
         """Calculates home power"""
         # calculation is all generation + grid + battery - device consumption
-        totals = self.get_power_totals()
         return (
-            totals.get(CT_GENERATION, 0)
-            + totals.get(CT_GRID, 0)
-            + totals.get(CT_BATTERY, 0)
-            - totals.get(CT_LOAD, 0)
+            self._totals.get(CT_GENERATION, 0)
+            + self._totals.get(CT_GRID, 0)
+            + self._totals.get(CT_BATTERY, 0)
+            - self._totals.get(CT_LOAD, 0)
         )
 
     @property
     def energy_imported(self):
         """Grid imported energy"""
-        energy_totals = self.get_energy_totals()
-        return energy_totals.get("grid_import", 0)
+        return self._history_totals.get("grid_import", 0)
 
     @property
     def energy_exported(self):
         """Grid exported energy"""
-        energy_totals = self.get_energy_totals()
-        return energy_totals.get("grid_export", 0)
+        return self._history_totals.get("grid_export", 0)
 
     @property
     def energy_generated(self):
         """Generated energy"""
-        energy_totals = self.get_energy_totals()
-        return energy_totals.get("generated", 0)
+        return self._history_totals.get("generated", 0)
 
     @property
     def energy_green(self):
         """Green energy"""
-        energy_totals = self.get_energy_totals()
-        return energy_totals.get("green", 0)
+        return self._history_totals.get("green", 0)
 
     @property
     def power_grid(self):
         """Grid total power"""
-        totals = self.get_power_totals()
-        return totals.get(CT_GRID, 0)
+        return self._totals.get(CT_GRID, 0)
+
+    @property
+    def frequency_grid(self):
+        """Grid frequency"""
+        return self._totals.get(FREQUENCY_GRID, None)
+
+    @property
+    def voltage_grid(self):
+        """Grid frequency"""
+        return self._totals.get(VOLTAGE_GRID, None)
 
     @property
     def power_generation(self):
         """Generation total power"""
-        totals = self.get_power_totals()
-        return totals.get(CT_GENERATION, 0)
+        return self._totals.get(CT_GENERATION, 0)
 
     @property
     def power_charging(self):
         """Chargers total power"""
-        totals = self.get_power_totals()
-        return totals.get(CT_LOAD, 0)
+        return self._totals.get(CT_LOAD, 0)
 
     @property
     def power_battery(self):
         """Battery total power"""
-        totals = self.get_power_totals()
-        return totals.get(CT_BATTERY, 0)
+        return self._totals.get(CT_BATTERY, 0)
 
     def find_device_name(self, key, default_value):
         """Find device or site name"""
@@ -212,6 +222,7 @@ class MyenergiClient:
                         f"Updating {existing_device.kind} {existing_device.name}"
                     )
                     existing_device.data = device_data
+        self._calculate_totals()
 
     async def refresh_history_today(self):
         today = datetime.now(timezone.utc)
@@ -225,6 +236,7 @@ class MyenergiClient:
             if device.kind == HARVI:
                 continue
             await device.refresh_history_data(from_date, how_long, resolution)
+        self._calculate_history_totals()
 
     async def fetch_data(self):
         """Fetch data from myenergi"""

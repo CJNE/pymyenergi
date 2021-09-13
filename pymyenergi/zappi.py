@@ -84,7 +84,7 @@ class Zappi(BaseDevice):
     @property
     def supply_voltage(self):
         """Supply voltage in V"""
-        return self._data.get("vol")
+        return self._data.get("vol", 0) / 10
 
     @property
     def power_grid(self):

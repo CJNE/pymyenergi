@@ -44,6 +44,16 @@ class Eddi(BaseDevice):
         return STATES[self._data.get("sta", 1)]
 
     @property
+    def supply_frequency(self):
+        """Supply frequency in Hz"""
+        return self._data.get("frq")
+
+    @property
+    def supply_voltage(self):
+        """Supply voltage in V"""
+        return self._data.get("vol", 0) / 10
+
+    @property
     def consumed_session(self):
         """Energy diverted this session kWh"""
         return self._data.get("che")
