@@ -125,6 +125,9 @@ class MyenergiClient:
         if self._totals.get(CT_GENERATION, 0) == 0 and zappi_or_eddi is not None:
             self._totals[CT_GENERATION] = zappi_or_eddi.power_generated
 
+    def get_power_totals(self):
+        return self._totals
+
     @property
     def consumption_home(self):
         """Calculates home power"""
