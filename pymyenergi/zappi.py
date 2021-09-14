@@ -186,6 +186,51 @@ class Zappi(BaseDevice):
         """Boost amount of energy to add"""
         return self._data.get("tbk", -1)
 
+    # The following propterties are have unknown purpose, names will change once known
+    @property
+    def bst(self):
+        return self._data.get("bst")
+
+    @property
+    def bsm(self):
+        return self._data.get("bsm")
+
+    @property
+    def bss(self):
+        return self._data.get("bss")
+
+    @property
+    def tz(self):
+        return self._data.get("tz")
+
+    @property
+    def pwm(self):
+        return self._data.get("pwm")
+
+    @property
+    def zs(self):
+        return self._data.get("zs")
+
+    @property
+    def rdc(self):
+        return self._data.get("rdc")
+
+    @property
+    def rac(self):
+        return self._data.get("rac")
+
+    @property
+    def rrac(self):
+        return self._data.get("rrac")
+
+    @property
+    def zsh(self):
+        return self._data.get("zsh")
+
+    @property
+    def zsl(self):
+        return self._data.get("zsl")
+
     def show(self):
         """Returns a string with all data in human readable format"""
         ret = ""
