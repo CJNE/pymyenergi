@@ -20,7 +20,20 @@ class Zappi(BaseDevice):
 
     def __init__(self, connection: Connection, serialno, data=None) -> None:
         self.history_data = {}
+        self.boost_data = {}
         super().__init__(connection, serialno, data)
+
+    async def refresh(self):
+        """Refresh device data"""
+        self.data = await self.fetch_data()
+
+    async def fetch_boost_data(self):
+        """Fetch data from myenergi"""
+        response = await self._connection.get(
+            f"/cgi-boost-time-{self.prefix}{self._serialno}"
+        )
+        data = response
+        return data
 
     @property
     def kind(self):
@@ -193,6 +206,7 @@ class Zappi(BaseDevice):
 
     @property
     def bsm(self):
+        """Boost mode maybe, turns 1 when manual boosting"""
         return self._data.get("bsm")
 
     @property
@@ -283,6 +297,11 @@ class Zappi(BaseDevice):
         await self._connection.get(f"/cgi-zappi-mode-Z{self._serialno}-4-0-0-0000")
         return True
 
+    async def stop_boost(self):
+        """Stop charge"""
+        await self._connection.get(f"/cgi-zappi-mode-Z{self._serialno}-2-0-0-0000")
+        return True
+
     async def set_charge_mode(self, mode):
         """Set charge mode, one of Fast, Eco, Eco+ or Stopped"""
         mode_int = CHARGE_MODES.index(mode.capitalize())
@@ -302,6 +321,8 @@ class Zappi(BaseDevice):
 
     async def start_boost(self, amount):
         """Start boost"""
+        if self.charge_mode not in ["Eco", "Eco+"]:
+            return False
         await self._connection.get(
             f"/cgi-zappi-mode-Z{self._serialno}-0-10-{int(amount)}-0000"
         )
@@ -313,9 +334,4 @@ class Zappi(BaseDevice):
         await self._connection.get(
             f"/cgi-zappi-mode-Z{self._serialno}-0-11-{int(amount)}-{time}"
         )
-        return True
-
-    async def stop_boost(self):
-        """Stop boost"""
-        await self._connection.get(f"/cgi-zappi-mode-Z{self._serialno}-0-2-0-0000")
         return True
