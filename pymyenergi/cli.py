@@ -10,6 +10,7 @@ from getpass import getpass
 from pymyenergi.client import device_factory
 from pymyenergi.client import MyenergiClient
 from pymyenergi.connection import Connection
+from pymyenergi.eddi import EDDI_MODES
 from pymyenergi.exceptions import WrongCredentials
 from pymyenergi.zappi import CHARGE_MODES
 
@@ -70,7 +71,7 @@ async def main(args):
             if args.action == "show":
                 if args.json:
                     print(json.dumps(device.data, indent=2))
-                    print(json.dumps(device.boost_data, indent=2))
+                    # print(json.dumps(device.boost_data, indent=2))
                 else:
                     print(device.show())
             elif args.action == "energy":
@@ -89,6 +90,12 @@ async def main(args):
                     sys.exit(f"A mode must be specifed, one of {modes}")
                 await device.set_charge_mode(args.arg[0])
                 print(f"Charging was set to {args.arg[0].capitalize()}")
+            elif args.action == "mode" and args.command == "eddi":
+                if len(args.arg) < 1 or args.arg[0].capitalize() not in EDDI_MODES:
+                    modes = ", ".join(EDDI_MODES)
+                    sys.exit(f"A mode must be specifed, one of {modes}")
+                await device.set_operating_mode(EDDI_MODES.index(args.arg[0]))
+                print(f"Charging was set to {args.arg[0].capitalize()}")
             elif args.action == "mingreen" and args.command == "zappi":
                 if len(args.arg) < 1:
                     sys.exit("A minimum green level must be provided")
@@ -99,6 +106,11 @@ async def main(args):
                     print(f"Start boosting with {args.arg[0]}kWh")
                 else:
                     print("Could not start boost, charge mode must be Eco or Eco+")
+            elif args.action == "boost" and args.command == "eddi":
+                if await device.start_boost(args.arg[0]):
+                    print(f"Start boosting for {args.arg[0]} minutes")
+                else:
+                    print("Could not start boost")
             elif args.action == "smart-boost" and args.command == "zappi":
                 if await device.start_smart_boost(args.arg[0], args.arg[1]):
                     print(
@@ -150,7 +162,7 @@ def cli():
         "eddi", help="use eddi --help for available commands"
     )
     subparser_eddi.add_argument("serial", default=None)
-    subparser_eddi.add_argument("action", choices=["show", "energy"])
+    subparser_eddi.add_argument("action", choices=["show", "energy", "mode", "boost"])
     subparser_eddi.add_argument("arg", nargs="*")
 
     subparser_harvi = subparsers.add_parser(

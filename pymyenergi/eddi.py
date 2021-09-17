@@ -18,6 +18,7 @@ TARGET_HEATER_1 = 1
 TARGET_HEATER_2 = 2
 TARGET_RELAY_1 = 11
 TARGET_RELAY_2 = 12
+EDDI_MODES = ["Stopped", "Normal"]
 
 
 class Eddi(BaseDevice):
