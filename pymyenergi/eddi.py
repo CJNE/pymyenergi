@@ -3,8 +3,21 @@ from pymyenergi.connection import Connection
 from . import EDDI
 from .base_device import BaseDevice
 
-
-STATES = ["Unkn0", "Paused", "Unkn2", "Diverting", "Boosting", "Completed", "Stopped"]
+MODE_NORMAL = 1
+MODE_STOPEED = 0
+STATES = [
+    "Unkn0",
+    "Paused",
+    "Unkn2",
+    "Diverting",
+    "Boosting",
+    "Max temp reached",
+    "Stopped",
+]
+TARGET_HEATER_1 = 1
+TARGET_HEATER_2 = 2
+TARGET_RELAY_1 = 11
+TARGET_RELAY_2 = 12
 
 
 class Eddi(BaseDevice):
@@ -78,9 +91,72 @@ class Eddi(BaseDevice):
         """Device green energy from history data"""
         return self.history_data.get("device_green", 0)
 
-    async def stop(self):
-        """Stop diverting"""
-        await self._connection.get(f"/cgi-eddi-mode-E{self._serialno}-0-0-0-0000")
+    @property
+    def temp_1(self):
+        """Temperature probe 1 temp"""
+        return self._data.get("tp1", -1)
+
+    @property
+    def temp_2(self):
+        """Temperature probe 2 temp"""
+        return self._data.get("tp2", -1)
+
+    @property
+    def temp_name_1(self):
+        """Temperature probe 2 name"""
+        return self._data.get("ht1", None)
+
+    @property
+    def temp_name_2(self):
+        """Temperature probe 2 name"""
+        return self._data.get("ht2", None)
+
+    @property
+    def priority(self):
+        """Current priority"""
+        return self._data.get("pri")
+
+    @property
+    def active_heater(self):
+        """Active heater"""
+        return self._data.get("hno")
+
+    @property
+    def remaining_boost_time(self):
+        """For how much longer boost will be active in seconds"""
+        return self._data.get("rbt", 0)
+
+    @property
+    def is_boosting(self):
+        """For how much longer boost will be active in seconds"""
+        return self._data.get("bsm", 0) == 1
+
+    # The following properties are unknonw, names might change
+    @property
+    def r1a(self):
+        """r1a?"""
+        return self._data.get("r1a")
+
+    @property
+    def r2a(self):
+        """r2a?"""
+        return self._data.get("r2a")
+
+    @property
+    def r1b(self):
+        """r1b?"""
+        return self._data.get("r1b")
+
+    async def set_operating_mode(self, mode: int):
+        """Stopped (0) or normal mode (1)"""
+        await self._connection.get(f"/cgi-eddi-mode-E{self._serialno}-{mode}")
+        return True
+
+    async def start_boost(self, target: int, time: int):
+        """Start manual boost of target for time minutes"""
+        await self._connection.get(
+            f"/cgi-eddi-boost-E{self._serialno}-10-{target}-{time}"
+        )
         return True
 
     def show(self):
@@ -91,8 +167,16 @@ class Eddi(BaseDevice):
             name = f" {self.name}"
         ret = ret + f"Eddi{name} "
         ret = ret + f"S/N {self.serial_number} version {self.firmware_version}\n\n"
+        ret = ret + f"Active heater: {self.active_heater}"
+        ret = ret + f"Priority: {self.priority}"
+        if self.is_boosting:
+            ret = ret + f"Boosting, {self.remaining_boost_time} miuntes left"
         ret = ret + f"CT 1 {self.ct1.name} {self.ct1.power}W\n"
         ret = ret + f"CT 2 {self.ct2.name} {self.ct2.power}W\n"
+        if self.temp_1 != -1:
+            ret = ret + f"Temp {self.temp_name_1}: {self.temp_1}C\n"
+        if self.temp_2 != -1:
+            ret = ret + f"Temp {self.temp_name_2}: {self.temp_2}C\n"
         for key in self.ct_keys:
             ret = ret + f"Energy {key} {self.history_data.get(key, 0)}Wh\n"
         return ret
