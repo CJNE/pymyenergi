@@ -36,7 +36,7 @@ async def main(args):
                 if args.json:
                     print(json.dumps(device.data, indent=2))
                 else:
-                    print(device.show())
+                    print(device.show(True))
         elif args.command == "overview":
             out = await client.show()
             print(out)

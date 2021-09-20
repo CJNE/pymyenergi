@@ -245,14 +245,17 @@ class Zappi(BaseDevice):
     def zsl(self):
         return self._data.get("zsl")
 
-    def show(self):
+    def show(self, short_format=False):
         """Returns a string with all data in human readable format"""
-        ret = ""
         name = ""
+        ret = ""
         if self.name:
             name = f" {self.name}"
-        ret = ret + f"Zappi{name} "
-        ret = ret + f"S/N {self.serial_number} version {self.firmware_version}\n\n"
+        ret = ret + f"Zappi S/N {self.serial_number}"
+        ret = ret + f"{name} version {self.firmware_version}"
+        if short_format:
+            return ret
+        ret = ret.center(80, "-") + "\n"
         ret = ret + f"Status: {self.status}\n"
         ret = ret + f"Plug status: {self.plug_status}\n"
         ret = ret + f"Locked: {self.locked}\n"

@@ -34,14 +34,17 @@ class Harvi(BaseDevice):
     def prefix(self):
         return "H"
 
-    def show(self):
+    def show(self, short_format=False):
         """Returns a string with all data in human readable format"""
         ret = ""
         name = ""
         if self.name:
             name = f" {self.name}"
-        ret = ret + f"Harvi{name} "
-        ret = ret + f"S/N {self.serial_number} version {self.firmware_version}\n\n"
+        ret = ret + f"Harvi S/N {self.serial_number}"
+        ret = ret + f"{name}"
+        if short_format:
+            return ret
+        ret = ret.center(80, "-") + "\n"
         ret = ret + f"CT 1 {self.ct1.name} {self.ct1.power}W phase {self.ct1.phase}\n"
         ret = ret + f"CT 2 {self.ct2.name} {self.ct2.power}W phase {self.ct2.phase}\n"
         ret = ret + f"CT 3 {self.ct3.name} {self.ct3.power}W phase {self.ct3.phase}\n"

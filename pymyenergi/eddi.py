@@ -160,14 +160,17 @@ class Eddi(BaseDevice):
         )
         return True
 
-    def show(self):
+    def show(self, short_format=False):
         """Returns a string with all data in human readable format"""
         ret = ""
         name = ""
         if self.name:
             name = f" {self.name}"
-        ret = ret + f"Eddi{name} "
-        ret = ret + f"S/N {self.serial_number} version {self.firmware_version}\n\n"
+        ret = ret + f"Eddi S/N {self.serial_number}"
+        ret = ret + f"{name} version {self.firmware_version}\n\n"
+        if short_format:
+            return ret
+        ret = ret.center(80, "-") + "\n"
         ret = ret + f"Active heater: {self.active_heater}"
         ret = ret + f"Priority: {self.priority}"
         if self.is_boosting:
