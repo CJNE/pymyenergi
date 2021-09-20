@@ -262,3 +262,31 @@ class MyenergiClient:
         if kind == "all":
             return all_devices
         return list(filter(lambda d: (d.kind == kind), all_devices))
+
+    async def show(self):
+        out = ""
+        devices = await self.get_devices()
+        await self.refresh_history_today()
+        out = f"Site name: {self.site_name}\n"
+        out = out + f"Home consumption : {self.consumption_home}W\n"
+        out = out + f"Power grid       : {self.power_grid}W\n"
+        out = out + f"Power generation : {self.power_generation}W\n"
+        out = out + f"Power EV charge  : {self.power_charging}W\n"
+        out = out + f"Power battery    : {self.power_battery}W\n"
+        out = out + f"Grid voltage     : {self.voltage_grid}V\n"
+        out = out + f"Grid frequency   : {self.frequency_grid}Hz\n"
+        out = out + f"Energy imported  : {self.energy_imported}kWh\n"
+        out = out + f"Energy exported  : {self.energy_exported}kWh\n"
+        out = out + f"Energy generated : {self.energy_generated}kWh\n"
+        out = out + f"Energy green     : {self.energy_green}kWh\n"
+        out = out + "Devices:\n"
+        for device in devices:
+            out = out + f"\t{device.kind.capitalize()}: {device.name}"
+            if device.kind != HARVI:
+                out = out + f"\t{device.energy_total}kWh today\n"
+                for key in device.ct_keys:
+                    out = out + f"\t{key} {device.history_data.get(key, 0)}kWh today\n"
+                out = out + "\n"
+            else:
+                out = out + "\n"
+        return out
