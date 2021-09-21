@@ -14,11 +14,8 @@ STATES = [
     "Max temp reached",
     "Stopped",
 ]
-TARGET_HEATER_1 = 1
-TARGET_HEATER_2 = 2
-TARGET_RELAY_1 = 11
-TARGET_RELAY_2 = 12
-EDDI_MODES = ["stopped", "normal"]
+BOOST_TARGETS = {"heater1": 1, "heater2": 2, "relay1": 11, "relay2": 12}
+EDDI_MODES = ["Stopped", "Normal"]
 
 
 class Eddi(BaseDevice):
@@ -148,15 +145,21 @@ class Eddi(BaseDevice):
         """r1b?"""
         return self._data.get("r1b")
 
-    async def set_operating_mode(self, mode: int):
-        """Stopped (0) or normal mode (1)"""
-        await self._connection.get(f"/cgi-eddi-mode-E{self._serialno}-{mode}")
+    async def set_operating_mode(self, mode: str):
+        """Stopped or normal mode"""
+        mode_int = EDDI_MODES.index(mode.capitalize())
+        await self._connection.get(f"/cgi-eddi-mode-E{self._serialno}-{mode_int}")
+        if mode_int == 0:
+            self._data["sta"] = 6
+        else:
+            self._data["sta"] = 5
         return True
 
-    async def start_boost(self, target: int, time: int):
+    async def manual_boost(self, target: str, time: int):
         """Start manual boost of target for time minutes"""
+        target_int = BOOST_TARGETS[target.lower().replace(" ", "")]
         await self._connection.get(
-            f"/cgi-eddi-boost-E{self._serialno}-10-{target}-{time}"
+            f"/cgi-eddi-boost-E{self._serialno}-10-{target_int}-{time}"
         )
         return True
 

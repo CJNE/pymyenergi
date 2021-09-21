@@ -10,6 +10,7 @@ from getpass import getpass
 from pymyenergi.client import device_factory
 from pymyenergi.client import MyenergiClient
 from pymyenergi.connection import Connection
+from pymyenergi.eddi import BOOST_TARGETS
 from pymyenergi.eddi import EDDI_MODES
 from pymyenergi.exceptions import WrongCredentials
 from pymyenergi.zappi import CHARGE_MODES
@@ -72,10 +73,10 @@ async def main(args):
                     await device.set_charge_mode(args.arg[0])
                     print(f"Charging was set to {args.arg[0].capitalize()}")
                 elif args.action == "mode" and args.command == EDDI:
-                    if len(args.arg) < 1 or args.arg[0].lower() not in EDDI_MODES:
+                    if len(args.arg) < 1 or args.arg[0].capitalize() not in EDDI_MODES:
                         modes = ", ".join(EDDI_MODES)
                         sys.exit(f"A mode must be specifed, one of {modes}")
-                    await device.set_operating_mode(EDDI_MODES.index(args.arg[0]))
+                    await device.set_operating_mode(args.arg[0])
                     print(f"Charging was set to {args.arg[0].capitalize()}")
                 elif args.action == "mingreen" and args.command == ZAPPI:
                     if len(args.arg) < 1:
@@ -88,8 +89,13 @@ async def main(args):
                     else:
                         print("Could not start boost, charge mode must be Eco or Eco+")
                 elif args.action == "boost" and args.command == EDDI:
-                    if await device.start_boost(args.arg[0]):
-                        print(f"Start boosting for {args.arg[0]} minutes")
+                    if len(args.arg) < 2 or args.arg[0] not in BOOST_TARGETS:
+                        targets = ", ".join(BOOST_TARGETS)
+                        sys.exit(
+                            f"A boost target and time must be specifed, one of {targets}"
+                        )
+                    if await device.manual_boost(args.arg[0], args.arg[1]):
+                        print(f"Start boosting {args.arg[0]} for {args.arg[1]} minutes")
                     else:
                         print("Could not start boost")
                 elif args.action == "smart-boost" and args.command == ZAPPI:

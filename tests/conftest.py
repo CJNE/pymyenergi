@@ -72,3 +72,9 @@ def harvi_fetch_data_fixture():
         "pymyenergi.harvi.Harvi.fetch_data", return_value=load_fixture_json("harvi")
     ):
         yield
+
+
+# @pytest.fixture
+# def eddi_connection_mock():
+#    with patch("pymyenergi.eddi.Eddi._connection"):
+#        yield AsyncMock
