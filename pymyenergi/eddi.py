@@ -1,7 +1,11 @@
+import logging
+
 from pymyenergi.connection import Connection
 
 from . import EDDI
 from .base_device import BaseDevice
+
+_LOGGER = logging.getLogger(__name__)
 
 MODE_NORMAL = 1
 MODE_STOPEED = 0
@@ -25,6 +29,21 @@ class Eddi(BaseDevice):
         self.history_data = {}
         super().__init__(connection, serialno, data)
 
+    async def fetch_data(self):
+        data = await super.fetch_data()
+        response = await self._connection.get(
+            f"/cgi-set-heater-priority-{self.prefix}{self._serialno}"
+        )
+        priority = response.get("pri", -1)
+        if priority == -1:
+            _LOGGER.debug("GUESSED KEY pri WAS NOT FOUND IN HEATER PRIORITY OUTPUT")
+            _LOGGER.debug(response)
+            _LOGGER.debug("PLEASE REPORT THIS ENTIRE MESSASGE BACK TO ME")
+        else:
+            data["_hprio"] = response.get(
+                "pri", 1
+            )  # I don't know what this response looks like
+
     @property
     def kind(self):
         return EDDI
@@ -32,6 +51,11 @@ class Eddi(BaseDevice):
     @property
     def prefix(self):
         return "E"
+
+    @property
+    def heater_priority(self):
+        """Current heater priority"""
+        return self._data.get("_hprio", 1)
 
     @property
     def ct_keys(self):
@@ -161,6 +185,15 @@ class Eddi(BaseDevice):
         await self._connection.get(
             f"/cgi-eddi-boost-E{self._serialno}-10-{target_int}-{time}"
         )
+        return True
+
+    async def set_heater_priority(self, target: str):
+        """Start manual boost of target for time minutes"""
+        target_int = BOOST_TARGETS[target.lower().replace(" ", "")]
+        await self._connection.get(
+            f"/cgi-set-heater-priority-E{self._serialno}-{target_int}"
+        )
+        self._data["_hprio"] = target_int
         return True
 
     def show(self, short_format=False):

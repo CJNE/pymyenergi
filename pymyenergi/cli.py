@@ -77,7 +77,7 @@ async def main(args):
                         modes = ", ".join(EDDI_MODES)
                         sys.exit(f"A mode must be specifed, one of {modes}")
                     await device.set_operating_mode(args.arg[0])
-                    print(f"Charging was set to {args.arg[0].capitalize()}")
+                    print(f"Operating mode was set to {args.arg[0].capitalize()}")
                 elif args.action == "mingreen" and args.command == ZAPPI:
                     if len(args.arg) < 1:
                         sys.exit("A minimum green level must be provided")
@@ -98,6 +98,16 @@ async def main(args):
                         print(f"Start boosting {args.arg[0]} for {args.arg[1]} minutes")
                     else:
                         print("Could not start boost")
+                elif args.action == "priority" and args.command == EDDI:
+                    if len(args.arg) < 2 or args.arg[0] not in BOOST_TARGETS:
+                        targets = ", ".join(BOOST_TARGETS)
+                        sys.exit(
+                            f"A priority target must be specifed, one of {targets}"
+                        )
+                    if await device.set_heater_priority(args.arg[0]):
+                        print(f"Heater priority was set to {args.arg[0]}")
+                    else:
+                        print("Could not set heater priority")
                 elif args.action == "smart-boost" and args.command == ZAPPI:
                     if await device.start_smart_boost(args.arg[0], args.arg[1]):
                         print(
@@ -152,7 +162,9 @@ def cli():
         EDDI, help="use eddi --help for available commands"
     )
     subparser_eddi.add_argument("-s", "--serial", dest="serial", default=None)
-    subparser_eddi.add_argument("action", choices=["show", "energy", "mode", "boost"])
+    subparser_eddi.add_argument(
+        "action", choices=["show", "energy", "mode", "boost", "priority"]
+    )
     subparser_eddi.add_argument("arg", nargs="*")
 
     subparser_harvi = subparsers.add_parser(
