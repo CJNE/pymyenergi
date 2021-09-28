@@ -60,12 +60,12 @@ async def main(args):
                     else:
                         print(device.show())
                 elif args.action == "energy":
-                    data = await device.energy_today()
+                    data = await device.energy_today(args.json)
                     if args.json:
                         print(json.dumps(data, indent=2))
                     else:
                         for key in data.keys():
-                            print(f"{key}: {(data[key]/1000):.2f}kWh")
+                            print(f"{key}: {data[key]}kWh")
                 elif args.action == "stop" and args.command == ZAPPI:
                     await device.stop_charge()
                     print("Charging was stopped")

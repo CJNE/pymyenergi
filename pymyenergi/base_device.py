@@ -92,23 +92,27 @@ class BaseDevice(ABC):
         data = response[self.kind][0]
         return data
 
-    async def energy_today(self):
+    async def energy_today(self, raw_response=False):
         today = datetime.now(timezone.utc)
         today = today.replace(hour=0, minute=0, second=0, microsecond=0)
         # return await self.history_energy_minutes(today, 1440)
-        return await self.history_energy_hours(today, 24)
+        return await self.history_energy_hours(today, 24, raw_response)
 
-    async def history_energy_minutes(self, date_from, how_long=1440):
+    async def history_energy_minutes(
+        self, date_from, how_long=1440, raw_response=False
+    ):
         if date_from is None:
             date_from = datetime.now(timezone.utc) - timedelta(minutes=how_long)
-        return await self.fetch_history_data(date_from, how_long, MINUTE)
+        return await self.fetch_history_data(date_from, how_long, MINUTE, raw_response)
 
-    async def history_energy_hours(self, date_from, how_long=24):
+    async def history_energy_hours(self, date_from, how_long=24, raw_response=False):
         if date_from is None:
             date_from = datetime.now(timezone.utc) - timedelta(hours=how_long)
-        return await self.fetch_history_data(date_from, how_long, HOUR)
+        return await self.fetch_history_data(date_from, how_long, HOUR, raw_response)
 
-    async def fetch_history_data(self, date_from, how_long, resolution):
+    async def fetch_history_data(
+        self, date_from, how_long, resolution, raw_response=False
+    ):
         energy_wh = {
             "gep": 0,
             "gen": 0,
@@ -134,6 +138,8 @@ class BaseDevice(ABC):
         _LOGGER.debug(f"Fetching {resolution} history data for {self.kind}")
         data = await self._connection.get(url)
         data = data[f"U{self.serial_number}"]
+        if raw_response:
+            return data
 
         for row in data:
             for key in energy_wh:
