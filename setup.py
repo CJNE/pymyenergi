@@ -1,10 +1,14 @@
 #!/usr/bin/env python
+import os
+
 from setuptools import setup
 
+version_file = open(os.path.join("pymyenergi", "VERSION"))
+version = version_file.read().strip()
 
 setup(
     name="pymyenergi",
-    version="0.0.20",
+    version=version,
     author="Johan Isaksson",
     author_email="johan@generatorhallen.se",
     description="Python library and CLI for communicating with myenergi API.",

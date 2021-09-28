@@ -31,6 +31,12 @@ async def main(args):
         logging.root.setLevel(logging.DEBUG)
     client = MyenergiClient(conn)
     try:
+        if args.version:
+            ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+            version_file = open(os.path.join(ROOT_DIR, "VERSION"))
+            version = version_file.read().strip()
+            print(version)
+            sys.exit(0)
         if args.command == "list":
             devices = await client.get_devices(args.kind)
             for device in devices:
@@ -99,7 +105,7 @@ async def main(args):
                     else:
                         print("Could not start boost")
                 elif args.action == "priority" and args.command == EDDI:
-                    if len(args.arg) < 2 or args.arg[0] not in BOOST_TARGETS:
+                    if len(args.arg) < 1 or args.arg[0] not in BOOST_TARGETS:
                         targets = ", ".join(BOOST_TARGETS)
                         sys.exit(
                             f"A priority target must be specifed, one of {targets}"
@@ -117,7 +123,6 @@ async def main(args):
                         print(
                             "Could not start smart boost, charge mode must be Eco or Eco+"
                         )
-
         else:
             sys.exit(
                 "Dont know what to do, type myenergi --help form available commands"
@@ -145,6 +150,7 @@ def cli():
     )
     parser.add_argument("-d", "--debug", dest="debug", action="store_true")
     parser.add_argument("-j", "--json", dest="json", action="store_true", default=False)
+    parser.add_argument("--version", dest="version", action="store_true", default=False)
     subparsers = parser.add_subparsers(dest="command", help="sub-command help")
     subparser_list = subparsers.add_parser("list", help="list devices")
     subparser_list.add_argument("-k", "--kind", dest="kind", default="all")
