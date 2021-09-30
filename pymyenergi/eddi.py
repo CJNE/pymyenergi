@@ -29,21 +29,6 @@ class Eddi(BaseDevice):
         self.history_data = {}
         super().__init__(connection, serialno, data)
 
-    async def fetch_data(self):
-        data = await super.fetch_data()
-        response = await self._connection.get(
-            f"/cgi-set-heater-priority-{self.prefix}{self._serialno}"
-        )
-        priority = response.get("pri", -1)
-        if priority == -1:
-            _LOGGER.debug("GUESSED KEY pri WAS NOT FOUND IN HEATER PRIORITY OUTPUT")
-            _LOGGER.debug(response)
-            _LOGGER.debug("PLEASE REPORT THIS ENTIRE MESSASGE BACK TO ME")
-        else:
-            data["_hprio"] = response.get(
-                "pri", 1
-            )  # I don't know what this response looks like
-
     @property
     def kind(self):
         return EDDI
@@ -55,7 +40,7 @@ class Eddi(BaseDevice):
     @property
     def heater_priority(self):
         """Current heater priority"""
-        return self._data.get("_hprio", 1)
+        return self._data.get("hpri", 1)
 
     @property
     def ct_keys(self):
@@ -190,10 +175,14 @@ class Eddi(BaseDevice):
     async def set_heater_priority(self, target: str):
         """Start manual boost of target for time minutes"""
         target_int = BOOST_TARGETS[target.lower().replace(" ", "")]
-        await self._connection.get(
-            f"/cgi-set-heater-priority-E{self._serialno}-{target_int}"
+        response = await self._connection.get(
+            f"/cgi-set-heater-priority-E{self._serialno}"
         )
-        self._data["_hprio"] = target_int
+        cpm = response.get("cpm", 0)
+        await self._connection.get(
+            f"/cgi-set-heater-priority-E{self._serialno}-{target_int}-{cpm}"
+        )
+        self._data["hpri"] = target_int
         return True
 
     def show(self, short_format=False):

@@ -211,15 +211,20 @@ class MyenergiClient:
                 serial = device_data.get("sno")
                 existing_device = self.devices.get(serial, None)
                 if existing_device is None:
-                    device_obj = device_factory(
+                    existing_device = device_factory(
                         self._connection, key, serial, device_data
                     )
-                    serial_key = device_obj.prefix + str(device_obj.serial_number)
-                    device_obj.name = self.find_device_name(
-                        serial_key, f"{device_obj.kind}-{device_obj.serial_number}"
+                    serial_key = existing_device.prefix + str(
+                        existing_device.serial_number
                     )
-                    _LOGGER.debug(f"Adding {device_obj.kind} {device_obj.name}")
-                    self.devices[serial] = device_obj
+                    existing_device.name = self.find_device_name(
+                        serial_key,
+                        f"{existing_device.kind}-{existing_device.serial_number}",
+                    )
+                    _LOGGER.debug(
+                        f"Adding {existing_device.kind} {existing_device.name}"
+                    )
+                    self.devices[serial] = existing_device
                 else:
                     _LOGGER.debug(
                         f"Updating {existing_device.kind} {existing_device.name}"
