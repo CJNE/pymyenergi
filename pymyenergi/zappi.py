@@ -331,6 +331,14 @@ class Zappi(BaseDevice):
         )
         return True
 
+    async def set_priority(self, priority):
+        """Set device priority"""
+        await self._connection.get(
+            f"/cgi-set-priority-Z{self._serialno}-{int(priority)}"
+        )
+        self._data["pri"] = int(priority)
+        return True
+
     async def start_smart_boost(self, amount, complete_by):
         """Start smart boost"""
         time = complete_by.replace(":", "")

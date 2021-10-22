@@ -172,6 +172,14 @@ class Eddi(BaseDevice):
         )
         return True
 
+    async def set_priority(self, priority):
+        """Set device priority"""
+        await self._connection.get(
+            f"/cgi-set-priority-E{self._serialno}-{int(priority)}"
+        )
+        self._data["pri"] = int(priority)
+        return True
+
     async def set_heater_priority(self, target: str):
         """Start manual boost of target for time minutes"""
         target_int = BOOST_TARGETS[target.lower().replace(" ", "")]

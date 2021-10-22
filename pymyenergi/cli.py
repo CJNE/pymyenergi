@@ -104,7 +104,14 @@ async def main(args):
                         print(f"Start boosting {args.arg[0]} for {args.arg[1]} minutes")
                     else:
                         print("Could not start boost")
-                elif args.action == "priority" and args.command == EDDI:
+                elif args.action == "priority" and args.command in [EDDI, ZAPPI]:
+                    if len(args.arg) < 1:
+                        sys.exit("A priority must be specifed, a number")
+                    if await device.set_priority(args.arg[0]):
+                        print(f"Device priority was set to {args.arg[0]}")
+                    else:
+                        print("Could not set heater priority")
+                elif args.action == "heaterpriority" and args.command == EDDI:
                     if len(args.arg) < 1 or args.arg[0] not in BOOST_TARGETS:
                         targets = ", ".join(BOOST_TARGETS)
                         sys.exit(
@@ -161,7 +168,16 @@ def cli():
     subparser_zappi.add_argument("-s", "--serial", dest="serial", default=None)
     subparser_zappi.add_argument(
         "action",
-        choices=["show", "energy", "stop", "mode", "boost", "smart-boost", "mingreen"],
+        choices=[
+            "show",
+            "energy",
+            "stop",
+            "mode",
+            "boost",
+            "smart-boost",
+            "mingreen",
+            "priority",
+        ],
     )
     subparser_zappi.add_argument("arg", nargs="*")
     subparser_eddi = subparsers.add_parser(
@@ -169,7 +185,8 @@ def cli():
     )
     subparser_eddi.add_argument("-s", "--serial", dest="serial", default=None)
     subparser_eddi.add_argument(
-        "action", choices=["show", "energy", "mode", "boost", "priority"]
+        "action",
+        choices=["show", "energy", "mode", "boost", "heaterpriority", "priority"],
     )
     subparser_eddi.add_argument("arg", nargs="*")
 
