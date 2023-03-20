@@ -346,3 +346,8 @@ class Zappi(BaseDevice):
             f"/cgi-zappi-mode-Z{self._serialno}-0-11-{int(amount)}-{time}"
         )
         return True
+    
+    async def unlock(self):
+        """Unlock"""
+        await self._connection.get(f"/cgi-jlock-Z{self._serialno}-00000010")
+        return True

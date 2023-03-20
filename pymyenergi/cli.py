@@ -177,6 +177,7 @@ def cli():
             "smart-boost",
             "mingreen",
             "priority",
+            "unlock",
         ],
     )
     subparser_zappi.add_argument("arg", nargs="*")
