@@ -46,7 +46,7 @@ class Eddi(BaseDevice):
     def ct_keys(self):
         """Return CT key names that are not none"""
         keys = {}
-        for i in range(2):
+        for i in range(3):
             ct = getattr(self, f"ct{i+1}")
             if ct.name_as_key == "ct_none":
                 continue
@@ -211,6 +211,7 @@ class Eddi(BaseDevice):
             ret = ret + f"Boosting, {self.remaining_boost_time} miuntes left"
         ret = ret + f"CT 1 {self.ct1.name} {self.ct1.power}W\n"
         ret = ret + f"CT 2 {self.ct2.name} {self.ct2.power}W\n"
+        ret = ret + f"CT 3 {self.ct3.name} {self.ct3.power}W\n"
         if self.temp_1 != -1:
             ret = ret + f"Temp {self.temp_name_1}: {self.temp_1}C\n"
         if self.temp_2 != -1:
