@@ -138,6 +138,12 @@ class Eddi(BaseDevice):
         """For how much longer boost will be active in seconds"""
         return self._data.get("bsm", 0) == 1
 
+    # CT1 and CT2 are defined in base device
+    @property
+    def ct3(self):
+        """Current transformer 3"""
+        return self._create_ct(3)
+
     # The following properties are unknonw, names might change
     @property
     def r1a(self):
