@@ -245,6 +245,14 @@ class Zappi(BaseDevice):
     def zsl(self):
         return self._data.get("zsl")
 
+    @property
+    def update_available(self):
+        return self._data.get("newBootloaderAvailable", False)
+
+    @property
+    def rdc(self):
+        return self._data.get("rdc")
+
     def show(self, short_format=False):
         """Returns a string with all data in human readable format"""
         name = ""
@@ -253,6 +261,8 @@ class Zappi(BaseDevice):
             name = f" {self.name}"
         ret = ret + f"Zappi S/N {self.serial_number}"
         ret = ret + f"{name} version {self.firmware_version}"
+        if self.update_available:
+            ret = ret + " (update available)"
         if short_format:
             return ret
         ret = ret.center(80, "-") + "\n"
