@@ -46,6 +46,8 @@ class MyenergiClient:
         self._keys = None
         self._totals = {}
         self._history_totals = {}
+        self._update_available = False
+        self._firmware_version = ""
 
     @property
     def site_name(self):
@@ -56,6 +58,11 @@ class MyenergiClient:
     def serial_number(self):
         """Hub serial number"""
         return self._connection.username
+
+    @property
+    def firmware_version(self):
+        """Hub firmware version"""
+        return self._firmware_version
 
     def _calculate_history_totals(self):
         """Caluclate history data totals"""
@@ -201,14 +208,20 @@ class MyenergiClient:
         self._data = data["devices"]
         self._keys = data["keys"]
         for grp in self._data:
-            key = list(grp.keys())[0]
+            keys = list(grp.keys())
+            key = keys[0]
+            if(len(keys) > 1 and keys[1] == 'fwv'):
+                self._firmware_version = grp['fwv']
             if key not in DEVICE_TYPES:
-                if key != "asn":
+                if key == "fwv":
+                    self._firmware_version = grp[key]
+                else:
                     _LOGGER.debug(f"Unknown device type: {key}")
                 continue
             devices = grp[key]
             for device_data in devices:
                 serial = device_data.get("sno")
+                self._update_available = device_data.get('newBootloaderAvailable', False)
                 existing_device = self.devices.get(serial, None)
                 if existing_device is None:
                     existing_device = device_factory(
@@ -273,17 +286,20 @@ class MyenergiClient:
         devices = await self.get_devices()
         await self.refresh_history_today()
         out = f"Site name: {self.site_name}\n"
-        out = out + f"Home consumption : {self.consumption_home}W\n"
-        out = out + f"Power grid       : {self.power_grid}W\n"
-        out = out + f"Power generation : {self.power_generation}W\n"
-        out = out + f"Power EV charge  : {self.power_charging}W\n"
-        out = out + f"Power battery    : {self.power_battery}W\n"
-        out = out + f"Grid voltage     : {self.voltage_grid}V\n"
-        out = out + f"Grid frequency   : {self.frequency_grid}Hz\n"
-        out = out + f"Energy imported  : {self.energy_imported}kWh\n"
-        out = out + f"Energy exported  : {self.energy_exported}kWh\n"
-        out = out + f"Energy generated : {self.energy_generated}kWh\n"
-        out = out + f"Energy green     : {self.energy_green}kWh\n"
+        out = out + f"Home consumption             : {self.consumption_home}W\n"
+        out = out + f"Power grid                   : {self.power_grid}W\n"
+        out = out + f"Power generation             : {self.power_generation}W\n"
+        out = out + f"Power EV charge              : {self.power_charging}W\n"
+        out = out + f"Power battery                : {self.power_battery}W\n"
+        out = out + f"Grid voltage                 : {self.voltage_grid}V\n"
+        out = out + f"Grid frequency               : {self.frequency_grid}Hz\n"
+        out = out + f"Energy imported              : {self.energy_imported}kWh\n"
+        out = out + f"Energy exported              : {self.energy_exported}kWh\n"
+        out = out + f"Energy generated             : {self.energy_generated}kWh\n"
+        out = out + f"Energy green                 : {self.energy_green}kWh\n"
+        out = out + "\n"
+        out = out + f"Hub serial number            : {self.serial_number}\n"
+        out = out + f"Hub firmware version         : {self.firmware_version}\n"
         out = out + "Devices:\n"
         for device in devices:
             out = out + f"\t{device.kind.capitalize()}: {device.name}"
