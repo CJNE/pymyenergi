@@ -76,7 +76,7 @@ class Eddi(BaseDevice):
     @property
     def consumed_session(self):
         """Energy diverted this session kWh"""
-        return self._data.get("che")
+        return self._data.get("che", 0)
 
     @property
     def power_grid(self):
