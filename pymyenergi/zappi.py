@@ -219,7 +219,7 @@ class Zappi(BaseDevice):
 
     @property
     def pwm(self):
-        return self._data.get("pwm")
+        return self._data.get("pwm") / 100
 
     @property
     def zs(self):
@@ -262,6 +262,7 @@ class Zappi(BaseDevice):
         ret = ret + f"Charge added: {self.charge_added}\n"
         ret = ret + f"Priority: {self.priority}\n"
         ret = ret + f"Charge mode: {self.charge_mode}\n"
+        ret = ret + f"PWM: {self.pwm}%\n"
         ret = ret + "\n"
         ret = ret + f"Lock when plugged in   : {self.lock_when_pluggedin}\n"
         ret = ret + f"Lock when unplugged    : {self.lock_when_unplugged}\n"
@@ -346,7 +347,7 @@ class Zappi(BaseDevice):
             f"/cgi-zappi-mode-Z{self._serialno}-0-11-{int(amount)}-{time}"
         )
         return True
-    
+
     async def unlock(self):
         """Unlock"""
         await self._connection.get(f"/cgi-jlock-Z{self._serialno}-00000010")
