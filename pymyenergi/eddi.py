@@ -54,6 +54,14 @@ class Eddi(BaseDevice):
         return keys
 
     @property
+    def hsk(self):
+        """ Heatsink temperature """
+        val = self._data.get("hsk", None)
+        if val is not None:
+            val = val / 10
+        return val
+
+    @property
     def l1_phase(self):
         """What phase L1 is connected to"""
         return self._data.get("pha", 0)
@@ -218,6 +226,8 @@ class Eddi(BaseDevice):
         ret = ret + f"CT 1 {self.ct1.name} {self.ct1.power}W\n"
         ret = ret + f"CT 2 {self.ct2.name} {self.ct2.power}W\n"
         ret = ret + f"CT 3 {self.ct3.name} {self.ct3.power}W\n"
+        if self.hsk is not None:
+            ret = ret + f"Heatsink temperature: {self.hsk}C\n"
         if self.temp_1 != -1:
             ret = ret + f"Temp {self.temp_name_1}: {self.temp_1}C\n"
         if self.temp_2 != -1:
