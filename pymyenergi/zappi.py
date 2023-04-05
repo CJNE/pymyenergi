@@ -12,6 +12,7 @@ PLUG_STATES = {
     "C1": "EV ready to charge",
     "C2": "Charging",
     "F": "Fault",
+    "U": "",
 }
 
 
@@ -117,7 +118,7 @@ class Zappi(BaseDevice):
     @property
     def plug_status(self):
         """Plug status, one of EV Disconnected, EV Connected, Waiting for EV, EV Ready to charge, Charging or Fault"""
-        return PLUG_STATES.get(self._data.get("pst"), "")
+        return PLUG_STATES.get(self._data.get("pst", "U"), "")
 
     @property
     def priority(self):
@@ -219,15 +220,11 @@ class Zappi(BaseDevice):
 
     @property
     def pwm(self):
-        return self._data.get("pwm") / 100
+        return self._data.get("pwm", 0) / 100
 
     @property
     def zs(self):
         return self._data.get("zs")
-
-    @property
-    def rdc(self):
-        return self._data.get("rdc")
 
     @property
     def rac(self):
