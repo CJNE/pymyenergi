@@ -150,16 +150,21 @@ class BaseDevice(ABC):
                 else:
                     watt_hours = row.get(key, 0) / 3600
                 energy_wh[key] = energy_wh[key] + watt_hours
+
+        device_boosted = round(
+            (energy_wh["h1b"] + energy_wh["h2b"] + energy_wh["h3b"]) / 1000, 2
+        )
+        device_green = round(
+            (energy_wh["h1d"] + energy_wh["h2d"] + energy_wh["h3d"]) / 1000, 2
+        )
+
         return_data = {
             "generated": round(energy_wh["gep"] / 1000, 2),
             "grid_import": round(energy_wh["imp"] / 1000, 2),
             "grid_export": round(energy_wh["exp"] / 1000, 2),
-            "device_total": round(
-                (energy_wh["h1b"] + energy_wh["h2b"] + energy_wh["h3b"]) / 1000, 2
-            ),
-            "device_green": round(
-                (energy_wh["h1d"] + energy_wh["h2d"] + energy_wh["h3d"]) / 1000, 2
-            ),
+            "device_boosted": device_boosted,
+            "device_green": device_green,
+            "device_total": device_boosted + device_green
         }
         for i in range(6):
             key = f"ct{i+1}"

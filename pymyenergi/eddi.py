@@ -46,12 +46,20 @@ class Eddi(BaseDevice):
     def ct_keys(self):
         """Return CT key names that are not none"""
         keys = {}
-        for i in range(2):
+        for i in range(3):
             ct = getattr(self, f"ct{i+1}")
             if ct.name_as_key == "ct_none":
                 continue
             keys[ct.name_as_key] = keys.get(ct.name_as_key, 0) + 1
         return keys
+
+    @property
+    def hsk(self):
+        """ Heatsink temperature """
+        val = self._data.get("hsk", None)
+        if val is not None:
+            val = val / 10
+        return val
 
     @property
     def l1_phase(self):
@@ -76,7 +84,7 @@ class Eddi(BaseDevice):
     @property
     def consumed_session(self):
         """Energy diverted this session kWh"""
-        return self._data.get("che")
+        return self._data.get("che", 0)
 
     @property
     def power_grid(self):
@@ -137,6 +145,12 @@ class Eddi(BaseDevice):
     def is_boosting(self):
         """For how much longer boost will be active in seconds"""
         return self._data.get("bsm", 0) == 1
+
+    # CT1 and CT2 are defined in base device
+    @property
+    def ct3(self):
+        """Current transformer 3"""
+        return self._create_ct(3)
 
     # The following properties are unknonw, names might change
     @property
@@ -211,6 +225,9 @@ class Eddi(BaseDevice):
             ret = ret + f"Boosting, {self.remaining_boost_time} miuntes left"
         ret = ret + f"CT 1 {self.ct1.name} {self.ct1.power}W\n"
         ret = ret + f"CT 2 {self.ct2.name} {self.ct2.power}W\n"
+        ret = ret + f"CT 3 {self.ct3.name} {self.ct3.power}W\n"
+        if self.hsk is not None:
+            ret = ret + f"Heatsink temperature: {self.hsk}C\n"
         if self.temp_1 != -1:
             ret = ret + f"Temp {self.temp_name_1}: {self.temp_1}C\n"
         if self.temp_2 != -1:

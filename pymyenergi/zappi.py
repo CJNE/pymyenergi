@@ -12,6 +12,7 @@ PLUG_STATES = {
     "C1": "EV ready to charge",
     "C2": "Charging",
     "F": "Fault",
+    "U": "",
 }
 
 
@@ -117,7 +118,7 @@ class Zappi(BaseDevice):
     @property
     def plug_status(self):
         """Plug status, one of EV Disconnected, EV Connected, Waiting for EV, EV Ready to charge, Charging or Fault"""
-        return PLUG_STATES.get(self._data.get("pst"), "")
+        return PLUG_STATES.get(self._data.get("pst", "U"), "")
 
     @property
     def priority(self):
@@ -175,14 +176,19 @@ class Zappi(BaseDevice):
         return self._data.get("sbk", -1)
 
     @property
-    def energy_total(self):
-        """Device total energy from history data"""
-        return self.history_data.get("device_total", 0)
-
+    def energy_boost(self):
+        """Device boosted energy from history data"""
+        return self.history_data.get("boost_total", 0)
+    
     @property
     def energy_green(self):
         """Device green energy from history data"""
         return self.history_data.get("device_green", 0)
+
+    @property
+    def energy_total(self):
+        """Device total energy from history data"""
+        return self.history_data.get("device_total", 0)
 
     # @property
     # def boost_start_hour(self):
@@ -219,15 +225,11 @@ class Zappi(BaseDevice):
 
     @property
     def pwm(self):
-        return self._data.get("pwm")
+        return self._data.get("pwm", 0) / 100
 
     @property
     def zs(self):
         return self._data.get("zs")
-
-    @property
-    def rdc(self):
-        return self._data.get("rdc")
 
     @property
     def rac(self):
@@ -245,6 +247,14 @@ class Zappi(BaseDevice):
     def zsl(self):
         return self._data.get("zsl")
 
+    @property
+    def update_available(self):
+        return self._data.get("newBootloaderAvailable", False)
+
+    @property
+    def rdc(self):
+        return self._data.get("rdc")
+
     def show(self, short_format=False):
         """Returns a string with all data in human readable format"""
         name = ""
@@ -253,6 +263,8 @@ class Zappi(BaseDevice):
             name = f" {self.name}"
         ret = ret + f"Zappi S/N {self.serial_number}"
         ret = ret + f"{name} version {self.firmware_version}"
+        if self.update_available:
+            ret = ret + " (update available)"
         if short_format:
             return ret
         ret = ret.center(80, "-") + "\n"
@@ -262,6 +274,7 @@ class Zappi(BaseDevice):
         ret = ret + f"Charge added: {self.charge_added}\n"
         ret = ret + f"Priority: {self.priority}\n"
         ret = ret + f"Charge mode: {self.charge_mode}\n"
+        ret = ret + f"PWM: {self.pwm}%\n"
         ret = ret + "\n"
         ret = ret + f"Lock when plugged in   : {self.lock_when_pluggedin}\n"
         ret = ret + f"Lock when unplugged    : {self.lock_when_unplugged}\n"
@@ -346,7 +359,7 @@ class Zappi(BaseDevice):
             f"/cgi-zappi-mode-Z{self._serialno}-0-11-{int(amount)}-{time}"
         )
         return True
-    
+
     async def unlock(self):
         """Unlock"""
         await self._connection.get(f"/cgi-jlock-{self._serialno}-00000010")
