@@ -1,7 +1,8 @@
 EDDI = "eddi"
 ZAPPI = "zappi"
 HARVI = "harvi"
-DEVICE_TYPES = [EDDI, ZAPPI, HARVI]
+LIBBI = "libbi"
+DEVICE_TYPES = [EDDI, ZAPPI, HARVI, LIBBI]
 HOUR = "hour"
 MINUTE = "minute"
 CT_GENERATION = "Generation"

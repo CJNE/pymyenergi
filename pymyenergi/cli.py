@@ -18,6 +18,7 @@ from pymyenergi.zappi import CHARGE_MODES
 from . import EDDI
 from . import HARVI
 from . import ZAPPI
+from . import LIBBI
 
 logging.basicConfig()
 logging.root.setLevel(logging.WARNING)
@@ -47,7 +48,7 @@ async def main(args):
         elif args.command == "overview":
             out = await client.show()
             print(out)
-        elif args.command in [ZAPPI, EDDI, HARVI]:
+        elif args.command in [ZAPPI, EDDI, HARVI, LIBBI]:
             if args.serial is None:
                 devices = await client.get_devices(args.command)
             else:
@@ -197,6 +198,13 @@ def cli():
     subparser_harvi.add_argument("-s", "--serial", dest="serial", default=None)
     subparser_harvi.add_argument("action", choices=["show"])
     subparser_harvi.add_argument("arg", nargs="*")
+
+    subparser_libbi = subparsers.add_parser(
+        subparser_libbi, help="use libbi --help for available commands"
+    )
+    subparser_libbi.add_argument("-s", "--serial", dest="serial", default=None)
+    subparser_libbi.add_argument("action", choices=["show"])
+    subparser_libbi.add_argument("arg", nargs="*")
 
     args = parser.parse_args()
 

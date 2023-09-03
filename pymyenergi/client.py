@@ -12,11 +12,13 @@ from . import DEVICE_TYPES
 from . import EDDI
 from . import FREQUENCY_GRID
 from . import HARVI
+from . import LIBBI
 from . import HOUR
 from . import VOLTAGE_GRID
 from . import ZAPPI
 from .eddi import Eddi
 from .harvi import Harvi
+from .harvi import Libbi
 from .zappi import Zappi
 
 _LOGGER = logging.getLogger(__name__)
@@ -30,6 +32,8 @@ def device_factory(conn, kind, serial, data=None):
         return Eddi(conn, serial, data)
     if kind == HARVI:
         return Harvi(conn, serial, data)
+    if kind == LIBBI:
+        return Libbi(conn, serial, data)
     raise Exception(f"Unsupported device type {kind}")
 
 
@@ -94,7 +98,7 @@ class MyenergiClient:
                     self._totals.get(device.ct2.name, 0) + device.ct2.power
                 )
 
-            if device.kind in [ZAPPI, HARVI]:
+            if device.kind in [ZAPPI, HARVI, LIBBI]:
                 if device.ct3.is_assigned:
                     self._totals[device.ct3.name] = (
                         self._totals.get(device.ct3.name, 0) + device.ct3.power
@@ -287,7 +291,7 @@ class MyenergiClient:
         out = out + "Devices:\n"
         for device in devices:
             out = out + f"\t{device.kind.capitalize()}: {device.name}"
-            if device.kind != HARVI:
+            if device.kind != HARVI & device.kind != LIBBI:
                 out = out + f"\t{device.energy_total}kWh today\n"
                 for key in device.ct_keys:
                     out = out + f"\t{key} {device.history_data.get(key, 0)}kWh today\n"
