@@ -49,6 +49,16 @@ class Libbi(BaseDevice):
     def state_of_charge(self):
         """State of Charge in %"""
         return self._data.get("soc", 0)
+
+    @property
+    def battery_size(self):
+        """Battery size in kwh"""
+        return self._data.get("mbc", 0) /1000
+    
+    @property
+    def inverter_size(self):
+        """Inverter size in kwh"""
+        return self._data.get("mic", 0) /1000
     
     @property
     def test_value(self):
@@ -70,6 +80,8 @@ class Libbi(BaseDevice):
         if short_format:
             return ret
         ret = ret.center(80, "-") + "\n"
+        ret = ret + f"Battery size: {self.battery_size}kWh\n"
+        ret = ret + f"Inverter size: {self.inverter_size}kWh\n"
         ret = ret + f"State of Charge: {self.state_of_charge}%\n"
         ret = ret + f"CT 1 {self.ct1.name} {self.ct1.power}W phase {self.ct1.phase}\n"
         ret = ret + f"CT 2 {self.ct2.name} {self.ct2.power}W phase {self.ct2.phase}\n"
