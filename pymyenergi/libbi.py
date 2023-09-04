@@ -10,13 +10,14 @@ _LOGGER = logging.getLogger(__name__)
 MODE_NORMAL = 1
 MODE_STOPPED = 0
 STATES = [
-    "Charging",
+    "u0",
     "u1",
     "Battery Full",
     "u3",
-    "u4",
-    "u5",
-    "Discharging"
+    "Stopped",
+    "Charging",
+    "Discharging",
+    "Duration Charging"
 ]
 
 LIBBI_MODES = ["Stopped","Normal"]
