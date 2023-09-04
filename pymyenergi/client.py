@@ -18,7 +18,7 @@ from . import VOLTAGE_GRID
 from . import ZAPPI
 from .eddi import Eddi
 from .harvi import Harvi
-from .harvi import Libbi
+from .libbi import Libbi
 from .zappi import Zappi
 
 _LOGGER = logging.getLogger(__name__)

@@ -200,7 +200,7 @@ def cli():
     subparser_harvi.add_argument("arg", nargs="*")
 
     subparser_libbi = subparsers.add_parser(
-        subparser_libbi, help="use libbi --help for available commands"
+        LIBBI, help="use libbi --help for available commands"
     )
     subparser_libbi.add_argument("-s", "--serial", dest="serial", default=None)
     subparser_libbi.add_argument("action", choices=["show"])

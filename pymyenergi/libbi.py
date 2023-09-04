@@ -4,7 +4,7 @@ from . import LIBBI
 from .base_device import BaseDevice
 
 
-class LIBBI(BaseDevice):
+class Libbi(BaseDevice):
     """Libbi Client for myenergi API."""
 
     def __init__(self, connection: Connection, serialno, data={}) -> None:
@@ -40,7 +40,7 @@ class LIBBI(BaseDevice):
         name = ""
         if self.name:
             name = f" {self.name}"
-        ret = ret + f"LIBBI S/N {self.serial_number}"
+        ret = ret + f"Libbi S/N {self.serial_number}"
         ret = ret + f"{name}"
         if short_format:
             return ret
