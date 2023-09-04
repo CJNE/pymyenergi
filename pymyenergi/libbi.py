@@ -1,18 +1,27 @@
+import logging
+
 from pymyenergi.connection import Connection
 
 from . import LIBBI
 from .base_device import BaseDevice
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class Libbi(BaseDevice):
     """Libbi Client for myenergi API."""
 
     def __init__(self, connection: Connection, serialno, data={}) -> None:
+        self.history_data = {}
         super().__init__(connection, serialno, data)
 
     @property
     def kind(self):
         return LIBBI
+
+    @property
+    def prefix(self):
+        return "E"
 
     @property
     def ct_keys(self):
@@ -46,9 +55,49 @@ class Libbi(BaseDevice):
         return self._create_ct(6)
     
     @property
+    def supply_frequency(self):
+        """Supply frequency in Hz"""
+        return self._data.get("frq")
+
+    @property
+    def supply_voltage(self):
+        """Supply voltage in V"""
+        return self._data.get("vol", 0) / 10
+
+    @property
+    def consumed_session(self):
+        """Energy diverted this session kWh"""
+        return self._data.get("che", 0)
+
+    @property
+    def power_grid(self):
+        """Grid power in W"""
+        return self._data.get("grd", 0)
+
+    @property
+    def power_generated(self):
+        """Generated power in W"""
+        return self._data.get("gen", 0)
+
+    @property
+    def energy_total(self):
+        """Device total energy from history data"""
+        return self.history_data.get("device_total", 0)
+
+    @property
+    def energy_green(self):
+        """Device green energy from history data"""
+        return self.history_data.get("device_green", 0)
+    
+    @property
     def state_of_charge(self):
         """State of Charge in %"""
         return self._data.get("soc", 0)
+    
+    @property
+    def priority(self):
+        """Current priority"""
+        return self._data.get("pri")
 
     @property
     def battery_size(self):
@@ -63,11 +112,11 @@ class Libbi(BaseDevice):
     @property
     def test_value(self):
         """Test value"""
-        return self._data.get("ectp5", 0)
+        return self._data.get("ivi1", 0)
 
     @property
     def prefix(self):
-        return "H"
+        return "L"
 
     def show(self, short_format=False):
         """Returns a string with all data in human readable format"""
@@ -80,6 +129,7 @@ class Libbi(BaseDevice):
         if short_format:
             return ret
         ret = ret.center(80, "-") + "\n"
+        ret = ret + f"Libbi priority: {self.priority}\n"
         ret = ret + f"Battery size: {self.battery_size}kWh\n"
         ret = ret + f"Inverter size: {self.inverter_size}kWh\n"
         ret = ret + f"State of Charge: {self.state_of_charge}%\n"
@@ -89,6 +139,8 @@ class Libbi(BaseDevice):
         ret = ret + f"CT 4 {self.ct4.name} {self.ct4.power}W phase {self.ct4.phase}\n"
         ret = ret + f"CT 5 {self.ct5.name} {self.ct5.power}W phase {self.ct5.phase}\n"
         ret = ret + f"CT 6 {self.ct6.name} {self.ct6.power}W phase {self.ct6.phase}\n"
+        for key in self.ct_keys:
+            ret = ret + f"Energy {key} {self.history_data.get(key, 0)}Wh\n"
         ret = ret + f"\nTest Value {self.test_value}\n"
 
         return ret

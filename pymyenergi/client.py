@@ -307,11 +307,11 @@ class MyenergiClient:
         out = out + "Devices:\n"
         for device in devices:
             out = out + f"\t{device.kind.capitalize()}: {device.name}"
-            if device.kind != HARVI & device.kind != LIBBI:
+            if device.kind != HARVI:
                 out = out + f"\t{device.energy_total}kWh today\n"
                 for key in device.ct_keys:
                     out = out + f"\t{key} {device.history_data.get(key, 0)}kWh today\n"
                 out = out + "\n"
             else:
-                out = out + "\n"
+                out = out + "\n\n"
         return out

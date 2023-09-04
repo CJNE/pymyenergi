@@ -218,11 +218,11 @@ class Eddi(BaseDevice):
         if short_format:
             return ret
         ret = ret.center(80, "-") + "\n"
-        ret = ret + f"Active heater:   {self.active_heater}"
-        ret = ret + f"Eddi priority:   {self.priority}"
-        ret = ret + f"Heater priority: {self.heater_priority}"
+        ret = ret + f"Active heater:   {self.active_heater}\n"
+        ret = ret + f"Eddi priority:   {self.priority}\n"
+        ret = ret + f"Heater priority: {self.heater_priority}\n"
         if self.is_boosting:
-            ret = ret + f"Boosting, {self.remaining_boost_time} miuntes left"
+            ret = ret + f"Boosting, {self.remaining_boost_time} miuntes left\n"
         ret = ret + f"CT 1 {self.ct1.name} {self.ct1.power}W\n"
         ret = ret + f"CT 2 {self.ct2.name} {self.ct2.power}W\n"
         ret = ret + f"CT 3 {self.ct3.name} {self.ct3.power}W\n"
