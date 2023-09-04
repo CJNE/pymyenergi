@@ -8,7 +8,7 @@ from .base_device import BaseDevice
 _LOGGER = logging.getLogger(__name__)
 
 MODE_NORMAL = 1
-MODE_STOPEED = 0
+MODE_STOPPED = 0
 STATES = [
     "Unkn0",
     "Paused",

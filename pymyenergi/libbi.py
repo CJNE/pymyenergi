@@ -7,6 +7,19 @@ from .base_device import BaseDevice
 
 _LOGGER = logging.getLogger(__name__)
 
+MODE_NORMAL = 1
+MODE_STOPPED = 0
+STATES = [
+    "Charging",
+    "u1",
+    "Battery Full",
+    "u3",
+    "u4",
+    "u5",
+    "Discharging"
+]
+
+LIBBI_MODES = ["Stopped","Normal"]
 
 class Libbi(BaseDevice):
     """Libbi Client for myenergi API."""
@@ -18,6 +31,11 @@ class Libbi(BaseDevice):
     @property
     def kind(self):
         return LIBBI
+    
+    @property
+    def status(self):
+        """Current status, one of Paused, Charging or Completed"""
+        return STATES[self._data.get("sta", 1)]
 
     @property
     def prefix(self):
@@ -117,6 +135,25 @@ class Libbi(BaseDevice):
     @property
     def prefix(self):
         return "L"
+    
+
+    async def set_operating_mode(self, mode: str):
+        """Stopped or normal mode"""
+        mode_int = LIBBI_MODES.index(mode.capitalize())
+        await self._connection.get(f"/cgi-libbi-mode-L{self._serialno}-{mode_int}")
+        if mode_int == 0:
+            self._data["sta"] = 6
+        else:
+            self._data["sta"] = 5
+        return True
+    
+    async def set_priority(self, priority):
+        """Set device priority"""
+        await self._connection.get(
+            f"/cgi-set-priority-L{self._serialno}-{int(priority)}"
+        )
+        self._data["pri"] = int(priority)
+        return True
 
     def show(self, short_format=False):
         """Returns a string with all data in human readable format"""
@@ -133,6 +170,7 @@ class Libbi(BaseDevice):
         ret = ret + f"Battery size: {self.battery_size}kWh\n"
         ret = ret + f"Inverter size: {self.inverter_size}kWh\n"
         ret = ret + f"State of Charge: {self.state_of_charge}%\n"
+        ret = ret + f"Status : {self.status}\n"
         ret = ret + f"CT 1 {self.ct1.name} {self.ct1.power}W phase {self.ct1.phase}\n"
         ret = ret + f"CT 2 {self.ct2.name} {self.ct2.power}W phase {self.ct2.phase}\n"
         ret = ret + f"CT 3 {self.ct3.name} {self.ct3.power}W phase {self.ct3.phase}\n"

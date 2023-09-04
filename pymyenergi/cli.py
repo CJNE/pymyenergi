@@ -14,6 +14,7 @@ from pymyenergi.eddi import BOOST_TARGETS
 from pymyenergi.eddi import EDDI_MODES
 from pymyenergi.exceptions import WrongCredentials
 from pymyenergi.zappi import CHARGE_MODES
+from pymyenergi.libbi import LIBBI_MODES
 
 from . import EDDI
 from . import HARVI
@@ -203,7 +204,7 @@ def cli():
         LIBBI, help="use libbi --help for available commands"
     )
     subparser_libbi.add_argument("-s", "--serial", dest="serial", default=None)
-    subparser_libbi.add_argument("action", choices=["show"])
+    subparser_libbi.add_argument("action", choices=["show","mode","priority"])
     subparser_libbi.add_argument("arg", nargs="*")
 
     args = parser.parse_args()
