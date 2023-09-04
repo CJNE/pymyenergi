@@ -1,3 +1,9 @@
+
+A very early attempt at reading a libbi.... lots of stuff doesn't work..... :)
+
+
+
+
 # pymyenergi
 
 An async python library for myenergi API
