@@ -14,10 +14,11 @@ STATES = [
     "u1",
     "Battery Full",
     "u3",
-    "Stopped",
+    "Idle",
     "Charging",
     "Discharging",
-    "Duration Charging"
+    "Duration Charging",
+    "u8"
 ]
 
 LIBBI_MODES = ["Stopped","Normal"]
@@ -36,7 +37,11 @@ class Libbi(BaseDevice):
     @property
     def status(self):
         """Current status, one of Paused, Charging or Completed"""
-        return STATES[self._data.get("sta", 1)]
+        n = self._data.get("sta", 1)
+        if n <= len(STATES) :
+            return STATES[n]
+        else :
+            return n
 
     @property
     def prefix(self):
@@ -131,7 +136,7 @@ class Libbi(BaseDevice):
     @property
     def test_value(self):
         """Test value"""
-        return self._data.get("ivi1", 0)
+        return self._data.get("contt", 0)
 
     @property
     def prefix(self):
