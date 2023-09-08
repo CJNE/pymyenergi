@@ -1,9 +1,3 @@
-
-A very early attempt at reading a libbi.... lots of stuff doesn't work..... :)
-
-
-
-
 # pymyenergi
 
 An async python library for myenergi API
@@ -59,6 +53,7 @@ positional arguments:
     zappi               use zappi --help for available commands
     eddi                use eddi --help for available commands
     harvi               use harvi --help for available commands
+    libbi               use libbi --help for available commands
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -149,6 +144,12 @@ async def get_data() -> None:
 loop = asyncio.get_event_loop()
 loop.run_until_complete(get_data())
 ```
+
+## libbi support
+  very early
+  reads a few values like State of Charge
+  gets the current status
+
 
 ## Credits
 
