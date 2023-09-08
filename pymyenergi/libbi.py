@@ -133,10 +133,7 @@ class Libbi(BaseDevice):
         """Inverter size in kwh"""
         return self._data.get("mic", 0) /1000
     
-    @property
-    def test_value(self):
-        """Test value"""
-        return self._data.get("contt", 0)
+
 
     @property
     def prefix(self):
@@ -185,6 +182,6 @@ class Libbi(BaseDevice):
         ret = ret + f"CT 6 {self.ct6.name} {self.ct6.power}W phase {self.ct6.phase}\n"
         for key in self.ct_keys:
             ret = ret + f"Energy {key} {self.history_data.get(key, 0)}Wh\n"
-        ret = ret + f"\nTest Value {self.test_value}\n"
+       
 
         return ret
