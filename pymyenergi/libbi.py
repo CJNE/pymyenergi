@@ -9,17 +9,14 @@ _LOGGER = logging.getLogger(__name__)
 
 MODE_NORMAL = 1
 MODE_STOPPED = 0
-STATES = [
-    "u0",
-    "u1",
-    "Battery Full",
-    "u3",
-    "Idle",
-    "Charging",
-    "Discharging",
-    "Duration Charging",
-    "u8"
-]
+
+STATES = { 2:'Battery Full',
+           4:'Idle',
+           5:'Charging',
+           6:'Discharging',
+           7:'Duration Charging',
+           102:'102',
+           104:'104 ' }
 
 LIBBI_MODES = ["Stopped","Normal"]
 
@@ -34,13 +31,15 @@ class Libbi(BaseDevice):
     def kind(self):
         return LIBBI
     
+
+        
     @property
     def status(self):
-        """Current status, one of Paused, Charging or Completed"""
+        """Get current known status"""
         n = self._data.get("sta", 1)
-        if n <= len(STATES) :
+        if n in STATES:
             return STATES[n]
-        else :
+        else:
             return n
 
     @property
@@ -173,6 +172,8 @@ class Libbi(BaseDevice):
         ret = ret + f"Battery size: {self.battery_size}kWh\n"
         ret = ret + f"Inverter size: {self.inverter_size}kWh\n"
         ret = ret + f"State of Charge: {self.state_of_charge}%\n"
+        ret = ret + f"Generated: {self.power_generated}W\n"
+        ret = ret + f"Grid: {self.power_grid}W\n"
         ret = ret + f"Status : {self.status}\n"
         ret = ret + f"CT 1 {self.ct1.name} {self.ct1.power}W phase {self.ct1.phase}\n"
         ret = ret + f"CT 2 {self.ct2.name} {self.ct2.power}W phase {self.ct2.phase}\n"
