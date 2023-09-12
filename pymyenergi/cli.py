@@ -14,10 +14,12 @@ from pymyenergi.eddi import BOOST_TARGETS
 from pymyenergi.eddi import EDDI_MODES
 from pymyenergi.exceptions import WrongCredentials
 from pymyenergi.zappi import CHARGE_MODES
+from pymyenergi.libbi import LIBBI_MODES
 
 from . import EDDI
 from . import HARVI
 from . import ZAPPI
+from . import LIBBI
 
 logging.basicConfig()
 logging.root.setLevel(logging.WARNING)
@@ -47,7 +49,7 @@ async def main(args):
         elif args.command == "overview":
             out = await client.show()
             print(out)
-        elif args.command in [ZAPPI, EDDI, HARVI]:
+        elif args.command in [ZAPPI, EDDI, HARVI, LIBBI]:
             if args.serial is None:
                 devices = await client.get_devices(args.command)
             else:
@@ -78,7 +80,7 @@ async def main(args):
                         sys.exit(f"A mode must be specifed, one of {modes}")
                     await device.set_charge_mode(args.arg[0])
                     print(f"Charging was set to {args.arg[0].capitalize()}")
-                elif args.action == "mode" and args.command == EDDI:
+                elif args.action == "mode" and args.command in [EDDI, LIBBI]:
                     if len(args.arg) < 1 or args.arg[0].capitalize() not in EDDI_MODES:
                         modes = ", ".join(EDDI_MODES)
                         sys.exit(f"A mode must be specifed, one of {modes}")
@@ -104,7 +106,7 @@ async def main(args):
                         print(f"Start boosting {args.arg[0]} for {args.arg[1]} minutes")
                     else:
                         print("Could not start boost")
-                elif args.action == "priority" and args.command in [EDDI, ZAPPI]:
+                elif args.action == "priority" and args.command in [EDDI, ZAPPI, LIBBI]:
                     if len(args.arg) < 1:
                         sys.exit("A priority must be specifed, a number")
                     if await device.set_priority(args.arg[0]):
@@ -197,6 +199,13 @@ def cli():
     subparser_harvi.add_argument("-s", "--serial", dest="serial", default=None)
     subparser_harvi.add_argument("action", choices=["show"])
     subparser_harvi.add_argument("arg", nargs="*")
+
+    subparser_libbi = subparsers.add_parser(
+        LIBBI, help="use libbi --help for available commands"
+    )
+    subparser_libbi.add_argument("-s", "--serial", dest="serial", default=None)
+    subparser_libbi.add_argument("action", choices=["show","mode","priority"])
+    subparser_libbi.add_argument("arg", nargs="*")
 
     args = parser.parse_args()
 

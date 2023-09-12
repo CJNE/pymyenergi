@@ -12,11 +12,13 @@ from . import DEVICE_TYPES
 from . import EDDI
 from . import FREQUENCY_GRID
 from . import HARVI
+from . import LIBBI
 from . import HOUR
 from . import VOLTAGE_GRID
 from . import ZAPPI
 from .eddi import Eddi
 from .harvi import Harvi
+from .libbi import Libbi
 from .zappi import Zappi
 
 _LOGGER = logging.getLogger(__name__)
@@ -30,6 +32,8 @@ def device_factory(conn, kind, serial, data=None):
         return Eddi(conn, serial, data)
     if kind == HARVI:
         return Harvi(conn, serial, data)
+    if kind == LIBBI:
+        return Libbi(conn, serial, data)
     raise Exception(f"Unsupported device type {kind}")
 
 
@@ -71,24 +75,24 @@ class MyenergiClient:
         self._history_totals = {"green": 0}
         for key in energy_keys:
             self._history_totals[key] = 0
-        zappi_or_eddi = None
+        zappi_or_eddi_or_libbi = None
         for device in devices:
-            if device.kind == ZAPPI or device.kind == EDDI:
-                zappi_or_eddi = device
+            if device.kind == ZAPPI or device.kind == EDDI or device == LIBBI:
+                zappi_or_eddi_or_libbi = device
                 break
-        if zappi_or_eddi is not None:
+        if zappi_or_eddi_or_libbi is not None:
             for key in energy_keys:
                 if self._history_totals[key] == 0:
-                    self._history_totals[key] = zappi_or_eddi.history_data.get(key, 0)
+                    self._history_totals[key] = zappi_or_eddi_or_libbi.history_data.get(key, 0)
             self._history_totals["green"] = self._history_totals.get(
                 "green", 0
-            ) + zappi_or_eddi.history_data.get("device_green", 0)
+            ) + zappi_or_eddi_or_libbi.history_data.get("device_green", 0)
 
     def _calculate_totals(self):
         """Calculate current data totals"""
         devices = self.get_devices_sync()
         self._totals = {}
-        zappi_or_eddi = None
+        zappi_or_eddi_or_libbi = None
         self._totals[CT_GRID] = 0
         self._totals[CT_GENERATION] = 0
         for device in devices:
@@ -101,16 +105,16 @@ class MyenergiClient:
                     self._totals.get(device.ct2.name, 0) + device.ct2.power
                 )
 
-            if device.kind in [ZAPPI, HARVI]:
+            if device.kind in [ZAPPI, HARVI, LIBBI]:
                 if device.ct3.is_assigned:
                     self._totals[device.ct3.name] = (
                         self._totals.get(device.ct3.name, 0) + device.ct3.power
                     )
             if device.kind == EDDI:
-                zappi_or_eddi = device
-            if device.kind == ZAPPI:
-                zappi_or_eddi = device
-                if device.kind == ZAPPI:
+                zappi_or_eddi_or_libbi = device
+            if device.kind == ZAPPI or device.kind == LIBBI:
+                zappi_or_eddi_or_libbi = device
+                if device.kind == ZAPPI or device.kind == LIBBI:
                     if device.ct4.is_assigned:
                         self._totals[device.ct4.name] = (
                             self._totals.get(device.ct4.name, 0) + device.ct4.power
@@ -124,13 +128,13 @@ class MyenergiClient:
                             self._totals.get(device.ct6.name, 0) + device.ct6.power
                         )
 
-        if zappi_or_eddi is not None:
-            self._totals[FREQUENCY_GRID] = zappi_or_eddi.supply_frequency
-            self._totals[VOLTAGE_GRID] = zappi_or_eddi.supply_voltage
-        if self._totals.get(CT_GRID, 0) == 0 and zappi_or_eddi is not None:
-            self._totals[CT_GRID] = zappi_or_eddi.power_grid
-        if self._totals.get(CT_GENERATION, 0) == 0 and zappi_or_eddi is not None:
-            self._totals[CT_GENERATION] = zappi_or_eddi.power_generated
+        if zappi_or_eddi_or_libbi is not None:
+            self._totals[FREQUENCY_GRID] = zappi_or_eddi_or_libbi.supply_frequency
+            self._totals[VOLTAGE_GRID] = zappi_or_eddi_or_libbi.supply_voltage
+        if self._totals.get(CT_GRID, 0) == 0 and zappi_or_eddi_or_libbi is not None:
+            self._totals[CT_GRID] = zappi_or_eddi_or_libbi.power_grid
+        if self._totals.get(CT_GENERATION, 0) == 0 and zappi_or_eddi_or_libbi is not None:
+            self._totals[CT_GENERATION] = zappi_or_eddi_or_libbi.power_generated
 
     def get_power_totals(self):
         return self._totals
@@ -309,5 +313,5 @@ class MyenergiClient:
                     out = out + f"\t{key} {device.history_data.get(key, 0)}kWh today\n"
                 out = out + "\n"
             else:
-                out = out + "\n"
+                out = out + "\n\n"
         return out
