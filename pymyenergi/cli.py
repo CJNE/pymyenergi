@@ -80,7 +80,7 @@ async def main(args):
                         sys.exit(f"A mode must be specifed, one of {modes}")
                     await device.set_charge_mode(args.arg[0])
                     print(f"Charging was set to {args.arg[0].capitalize()}")
-                elif args.action == "mode" and args.command == EDDI:
+                elif args.action == "mode" and args.command in [EDDI, LIBBI]:
                     if len(args.arg) < 1 or args.arg[0].capitalize() not in EDDI_MODES:
                         modes = ", ".join(EDDI_MODES)
                         sys.exit(f"A mode must be specifed, one of {modes}")
