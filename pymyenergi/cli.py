@@ -106,7 +106,7 @@ async def main(args):
                         print(f"Start boosting {args.arg[0]} for {args.arg[1]} minutes")
                     else:
                         print("Could not start boost")
-                elif args.action == "priority" and args.command in [EDDI, ZAPPI]:
+                elif args.action == "priority" and args.command in [EDDI, ZAPPI, LIBBI]:
                     if len(args.arg) < 1:
                         sys.exit("A priority must be specifed, a number")
                     if await device.set_priority(args.arg[0]):

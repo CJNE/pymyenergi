@@ -10,13 +10,15 @@ _LOGGER = logging.getLogger(__name__)
 MODE_NORMAL = 1
 MODE_STOPPED = 0
 
-STATES = { 2:'Battery Full',
+STATES = { 0:'Off',
+           1:'On',
+           2:'Battery Full',
            4:'Idle',
            5:'Charging',
            6:'Discharging',
            7:'Duration Charging',
            102:'102',
-           104:'104 ' }
+           104:'104' }
 
 LIBBI_MODES = ["Stopped","Normal"]
 
@@ -141,18 +143,21 @@ class Libbi(BaseDevice):
 
     async def set_operating_mode(self, mode: str):
         """Stopped or normal mode"""
+        print(f"set mode")
         mode_int = LIBBI_MODES.index(mode.capitalize())
-        await self._connection.get(f"/cgi-libbi-mode-L{self._serialno}-{mode_int}")
+        await self._connection.get(
+            f"/cgi-libbi-mode-{self.prefix}{self._serialno}-{mode_int}"
+            )
         if mode_int == 0:
-            self._data["sta"] = 6
+            self._data["sta"] = 0
         else:
-            self._data["sta"] = 5
+            self._data["sta"] = 1
         return True
     
     async def set_priority(self, priority):
         """Set device priority"""
         await self._connection.get(
-            f"/cgi-set-priority-L{self._serialno}-{int(priority)}"
+            f"/cgi-set-priority-{self.prefix}{self._serialno}-{int(priority)}"
         )
         self._data["pri"] = int(priority)
         return True
