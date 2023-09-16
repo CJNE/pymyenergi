@@ -153,6 +153,14 @@ Very early and basic support of Libbi.
 - Gets and sets the current status
 - Change priority of Libbi
 
+cli examples:
+'''
+myenergi libbi show
+myenergi libbi mode normal
+myenergi libbi mode stop
+myenergi libbi priority 1
+'''
+
 
 
 ## Credits
