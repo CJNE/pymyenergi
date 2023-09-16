@@ -146,9 +146,13 @@ loop.run_until_complete(get_data())
 ```
 
 ## libbi support
-  very early
-  reads a few values like State of Charge
-  gets the current status
+Very early and basic support of Libbi.
+Reads a few values such as State of Charge, DCPV CT
+Battery in and out energy
+Gets and sets the current status
+Change priority of Libbi 
+
+
 
 
 ## Credits
