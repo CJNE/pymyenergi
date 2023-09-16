@@ -154,12 +154,12 @@ Very early and basic support of Libbi.
 - Change priority of Libbi
 
 cli examples:
-'''
+```
 myenergi libbi show
 myenergi libbi mode normal
 myenergi libbi mode stop
 myenergi libbi priority 1
-'''
+```
 
 
 
