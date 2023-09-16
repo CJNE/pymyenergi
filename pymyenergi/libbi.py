@@ -32,8 +32,6 @@ class Libbi(BaseDevice):
     @property
     def kind(self):
         return LIBBI
-    
-
         
     @property
     def status(self):
@@ -43,6 +41,11 @@ class Libbi(BaseDevice):
             return STATES[n]
         else:
             return n
+    
+    @property
+    def localMode(self):
+        """Get current known status"""
+        return self._data.get("lmo", 1)
 
     @property
     def prefix(self):
@@ -52,7 +55,7 @@ class Libbi(BaseDevice):
     def ct_keys(self):
         """Return CT key names that are not none"""
         keys = {}
-        for i in range(3):
+        for i in range(6):
             ct = getattr(self, f"ct{i+1}")
             if ct.name_as_key == "ct_none":
                 continue
@@ -178,8 +181,10 @@ class Libbi(BaseDevice):
         ret = ret + f"Inverter size: {self.inverter_size}kWh\n"
         ret = ret + f"State of Charge: {self.state_of_charge}%\n"
         ret = ret + f"Generated: {self.power_generated}W\n"
+        ret = ret + f"Generated Today: {self.history_data.get()}W\n"
         ret = ret + f"Grid: {self.power_grid}W\n"
         ret = ret + f"Status : {self.status}\n"
+        ret = ret + f"Local Mode : {self.localMode}\n"
         ret = ret + f"CT 1 {self.ct1.name} {self.ct1.power}W phase {self.ct1.phase}\n"
         ret = ret + f"CT 2 {self.ct2.name} {self.ct2.power}W phase {self.ct2.phase}\n"
         ret = ret + f"CT 3 {self.ct3.name} {self.ct3.power}W phase {self.ct3.phase}\n"
@@ -188,6 +193,5 @@ class Libbi(BaseDevice):
         ret = ret + f"CT 6 {self.ct6.name} {self.ct6.power}W phase {self.ct6.phase}\n"
         for key in self.ct_keys:
             ret = ret + f"Energy {key} {self.history_data.get(key, 0)}Wh\n"
-       
-
+        
         return ret

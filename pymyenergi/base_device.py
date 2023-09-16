@@ -130,6 +130,10 @@ class BaseDevice(ABC):
             "ct4": 0,
             "ct5": 0,
             "ct6": 0,
+            "ive1": 0,
+            "bdp1": 0,
+            "bcp1": 0,
+            "pvp1": 0
         }
         if resolution == MINUTE:
             url = f"/cgi-jday-{self.prefix}{self._serialno}-{date_from.year}-{date_from.month}-{date_from.day}-{date_from.hour}-0-{how_long}"
@@ -158,10 +162,15 @@ class BaseDevice(ABC):
             (energy_wh["h1d"] + energy_wh["h2d"] + energy_wh["h3d"]) / 1000, 2
         )
 
+
+
         return_data = {
             "generated": round(energy_wh["gep"] / 1000, 2),
             "grid_import": round(energy_wh["imp"] / 1000, 2),
             "grid_export": round(energy_wh["exp"] / 1000, 2),
+            "battery_in": round(energy_wh["bcp1"] / 1000, 2),
+            "battery_out": round(energy_wh["bdp1"] / 1000, 2),
+            "pv_total": round(energy_wh["pvp1"] / 1000, 2),
             "device_boosted": device_boosted,
             "device_green": device_green,
             "device_total": device_boosted + device_green
