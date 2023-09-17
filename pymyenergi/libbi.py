@@ -189,7 +189,7 @@ class Libbi(BaseDevice):
         ret = ret + f"Generating: {self.power_generated}W\n" 
         ret = ret + f"Grid: {self.power_grid}W\n"
         ret = ret + f"Status : {self.status}\n"
-        ret = ret + f"Local Mode : {self.localMode}\n"
+        ret = ret + f"Local Mode : {self.local_mode}\n"
         ret = ret + f"CT 1 {self.ct1.name} {self.ct1.power}W phase {self.ct1.phase}\n"
         ret = ret + f"CT 2 {self.ct2.name} {self.ct2.power}W phase {self.ct2.phase}\n"
         ret = ret + f"CT 3 {self.ct3.name} {self.ct3.power}W phase {self.ct3.phase}\n"
