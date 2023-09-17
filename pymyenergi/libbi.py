@@ -45,7 +45,7 @@ class Libbi(BaseDevice):
             return n
     
     @property
-    def localMode(self):
+    def local_mode(self):
         """Get current known status"""
         return self._data.get("lmo", 1)
 
