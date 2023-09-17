@@ -186,9 +186,7 @@ class Libbi(BaseDevice):
         ret = ret + f"Battery size: {self.battery_size}kWh\n"
         ret = ret + f"Inverter size: {self.inverter_size}kWh\n"
         ret = ret + f"State of Charge: {self.state_of_charge}%\n"
-        ret = ret + f"Generating: {self.power_generated}W\n"
-        ret = ret + f"Battery Charge: {self.energy_charge}wh\n"
- 
+        ret = ret + f"Generating: {self.power_generated}W\n" 
         ret = ret + f"Grid: {self.power_grid}W\n"
         ret = ret + f"Status : {self.status}\n"
         ret = ret + f"Local Mode : {self.localMode}\n"
