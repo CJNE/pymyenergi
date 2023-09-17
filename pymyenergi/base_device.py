@@ -162,8 +162,6 @@ class BaseDevice(ABC):
             (energy_wh["h1d"] + energy_wh["h2d"] + energy_wh["h3d"]) / 1000, 2
         )
 
-
-
         return_data = {
             "generated": round(energy_wh["gep"] / 1000, 2),
             "grid_import": round(energy_wh["imp"] / 1000, 2),
