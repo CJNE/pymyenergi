@@ -131,6 +131,7 @@ class BaseDevice(ABC):
             "ct5": 0,
             "ct6": 0,
             "ive1": 0,
+            "ivi1": 0,
             "bdp1": 0,
             "bcp1": 0,
             "pvp1": 0
@@ -166,13 +167,17 @@ class BaseDevice(ABC):
             "generated": round(energy_wh["gep"] / 1000, 2),
             "grid_import": round(energy_wh["imp"] / 1000, 2),
             "grid_export": round(energy_wh["exp"] / 1000, 2),
-            "battery_in": round(energy_wh["bcp1"] / 1000, 2),
-            "battery_out": round(energy_wh["bdp1"] / 1000, 2),
-            "pv_total": round(energy_wh["pvp1"] / 1000, 2),
+            "battery_charge": round(energy_wh["bcp1"] / 1000, 2),
+            "battery_discharge": round(energy_wh["bdp1"] / 1000, 2),
+            "inverter_export": round(energy_wh["ive1"] /1000, 2),
+            "inverter_import": round(energy_wh["ivi1"] /1000, 2),
             "device_boosted": device_boosted,
             "device_green": device_green,
             "device_total": device_boosted + device_green
         }
+        if resolution == MINUTE:
+            return_data["pv_total"] = round(energy_wh["pvp1"] / 1000, 2)
+
         for i in range(6):
             key = f"ct{i+1}"
             if hasattr(self, key):
