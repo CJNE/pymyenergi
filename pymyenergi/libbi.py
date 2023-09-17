@@ -120,6 +120,16 @@ class Libbi(BaseDevice):
         return self.history_data.get("device_green", 0)
     
     @property
+    def energy_charge(self):
+        """Device Battery in from history data"""
+        return self.history_data.get("battery_charge",0)
+    
+    @property
+    def energy_discharge(self):
+        """Device Battery out from history data"""
+        return self.history_data.get("battery_discharge",0)
+    
+    @property
     def state_of_charge(self):
         """State of Charge in %"""
         return self._data.get("soc", 0)
@@ -177,8 +187,9 @@ class Libbi(BaseDevice):
         ret = ret + f"Battery size: {self.battery_size}kWh\n"
         ret = ret + f"Inverter size: {self.inverter_size}kWh\n"
         ret = ret + f"State of Charge: {self.state_of_charge}%\n"
-        ret = ret + f"Generated: {self.power_generated}W\n"
-        #ret = ret + f"Generated Today: {self.history_data.get()}W\n"
+        ret = ret + f"Generating: {self.power_generated}W\n"
+        ret = ret + f"Battery Charge: {self.energy_charge}wh\n"
+ 
         ret = ret + f"Grid: {self.power_grid}W\n"
         ret = ret + f"Status : {self.status}\n"
         ret = ret + f"Local Mode : {self.localMode}\n"
@@ -190,5 +201,4 @@ class Libbi(BaseDevice):
         ret = ret + f"CT 6 {self.ct6.name} {self.ct6.power}W phase {self.ct6.phase}\n"
         for key in self.ct_keys:
             ret = ret + f"Energy {key} {self.history_data.get(key, 0)}Wh\n"
-        
         return ret
