@@ -118,11 +118,13 @@ class Libbi(BaseDevice):
         """Device green energy from history data"""
         return self.history_data.get("device_green", 0)
     
+    """ added battery_charge and battery_discharge for consistent naming - will remove this """
     @property
     def energy_charge(self):
         """Device Battery in from history data"""
         return  self.history_data.get("battery_charge",0)
     
+    """ added battery_charge and battery_discharge for consistent naming - will remove this """
     @property
     def energy_discharge(self):
         """Device Battery out from history data"""
@@ -147,6 +149,31 @@ class Libbi(BaseDevice):
     def inverter_size(self):
         """Inverter size in kwh"""
         return self._data.get("mic", 0) /1000
+
+    @property
+    def grid_import(self):
+        """Grid import from history data"""
+        return self.history_data.get("grid_import", 0)
+
+    @property
+    def grid_export(self):
+        """Grid export from history data"""
+        return self.history_data.get("grid_export", 0)
+
+    @property
+    def battery_charge(self):
+        """Battery charge from history data"""
+        return self.history_data.get("battery_charge", 0)
+
+    @property
+    def battery_discharge(self):
+        """Battery discharge from history data"""
+        return self.history_data.get("battery_discharge", 0)
+
+    @property
+    def generated(self):
+        """Solar generation from history data"""
+        return self.history_data.get("generated", 0)
 
     @property
     def prefix(self):
