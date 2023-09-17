@@ -17,8 +17,7 @@ STATES = { 0:'Off',
            5:'Charging',
            6:'Discharging',
            7:'Duration Charging',
-           102:'102',
-           104:'104',
+           101:'Idle?',
            234:'Calibration Charge' }
 
 LIBBI_MODES = ["Stopped","Normal"]
@@ -122,7 +121,7 @@ class Libbi(BaseDevice):
     @property
     def energy_charge(self):
         """Device Battery in from history data"""
-        return self.history_data.get("battery_charge",0)
+        return  self.history_data.get("battery_charge",0)
     
     @property
     def energy_discharge(self):
