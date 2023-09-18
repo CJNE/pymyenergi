@@ -118,18 +118,6 @@ class Libbi(BaseDevice):
         """Device green energy from history data"""
         return self.history_data.get("device_green", 0)
     
-    """ added battery_charge and battery_discharge for consistent naming - will remove this """
-    @property
-    def energy_charge(self):
-        """Device Battery in from history data"""
-        return  self.history_data.get("battery_charge",0)
-    
-    """ added battery_charge and battery_discharge for consistent naming - will remove this """
-    @property
-    def energy_discharge(self):
-        """Device Battery out from history data"""
-        return self.history_data.get("battery_discharge",0)
-    
     @property
     def state_of_charge(self):
         """State of Charge in %"""
