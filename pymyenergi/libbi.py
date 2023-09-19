@@ -18,6 +18,7 @@ STATES = { 0:'Off',
            6:'Discharging',
            7:'Duration Charging',
            101:'Idle?',
+           102:'102',
            234:'Calibration Charge' }
 
 LIBBI_MODES = ["Stopped","Normal"]
