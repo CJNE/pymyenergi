@@ -18,6 +18,7 @@ STATES = { 0:'Off',
            6:'Discharging',
            7:'Duration Charging',
            101:'Idle?',
+           102:'102',
            234:'Calibration Charge' }
 
 LIBBI_MODES = ["Stopped","Normal"]
@@ -119,16 +120,6 @@ class Libbi(BaseDevice):
         return self.history_data.get("device_green", 0)
     
     @property
-    def energy_charge(self):
-        """Device Battery in from history data"""
-        return  self.history_data.get("battery_charge",0)
-    
-    @property
-    def energy_discharge(self):
-        """Device Battery out from history data"""
-        return self.history_data.get("battery_discharge",0)
-    
-    @property
     def state_of_charge(self):
         """State of Charge in %"""
         return self._data.get("soc", 0)
@@ -147,6 +138,31 @@ class Libbi(BaseDevice):
     def inverter_size(self):
         """Inverter size in kwh"""
         return self._data.get("mic", 0) /1000
+
+    @property
+    def grid_import(self):
+        """Grid import from history data"""
+        return self.history_data.get("grid_import", 0)
+
+    @property
+    def grid_export(self):
+        """Grid export from history data"""
+        return self.history_data.get("grid_export", 0)
+
+    @property
+    def battery_charge(self):
+        """Battery charge from history data"""
+        return self.history_data.get("battery_charge", 0)
+
+    @property
+    def battery_discharge(self):
+        """Battery discharge from history data"""
+        return self.history_data.get("battery_discharge", 0)
+
+    @property
+    def generated(self):
+        """Solar generation from history data"""
+        return self.history_data.get("generated", 0)
 
     @property
     def prefix(self):
