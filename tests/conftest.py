@@ -74,6 +74,15 @@ def harvi_fetch_data_fixture():
         yield
 
 
+@pytest.fixture(name="libbi_fetch_data_fixture")
+def libbi_fetch_data_fixture():
+    """Mock data from client.fetch_data()"""
+    with patch(
+        "pymyenergi.libbi.Libbi.fetch_data", return_value=load_fixture_json("libbi")
+    ):
+        yield
+
+
 # @pytest.fixture
 # def eddi_connection_mock():
 #    with patch("pymyenergi.eddi.Eddi._connection"):

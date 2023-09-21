@@ -1,7 +1,7 @@
 -r requirements_dev.txt
-pytest-sugar==0.9.4
-pytest-timeout==1.4.2
+pytest-sugar==0.9.7
+pytest-timeout==2.1.0
 pytest-httpx
-pytest-xdist==2.2.1
-pytest==6.2.4
+pytest-xdist==3.3.1
+pytest==7.4.2
 pytest-asyncio
