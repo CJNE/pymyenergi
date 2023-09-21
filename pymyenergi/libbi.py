@@ -17,10 +17,12 @@ STATES = { 0:'Off',
            5:'Charging',
            6:'Discharging',
            7:'Duration Charging',
+           101:'Idle?',
            102:'102',
-           104:'104' }
+           234:'Calibration Charge' }
 
 LIBBI_MODES = ["Stopped","Normal"]
+LIBBI_MODE_NAMES = ["STOP", "BALANCE"]
 
 class Libbi(BaseDevice):
     """Libbi Client for myenergi API."""
@@ -32,8 +34,6 @@ class Libbi(BaseDevice):
     @property
     def kind(self):
         return LIBBI
-    
-
         
     @property
     def status(self):
@@ -43,6 +43,11 @@ class Libbi(BaseDevice):
             return STATES[n]
         else:
             return n
+    
+    @property
+    def local_mode(self):
+        """Get current known status"""
+        return self._data.get("lmo", 1)
 
     @property
     def prefix(self):
@@ -52,7 +57,7 @@ class Libbi(BaseDevice):
     def ct_keys(self):
         """Return CT key names that are not none"""
         keys = {}
-        for i in range(3):
+        for i in range(6):
             ct = getattr(self, f"ct{i+1}")
             if ct.name_as_key == "ct_none":
                 continue
@@ -133,8 +138,31 @@ class Libbi(BaseDevice):
     def inverter_size(self):
         """Inverter size in kwh"""
         return self._data.get("mic", 0) /1000
-    
 
+    @property
+    def grid_import(self):
+        """Grid import from history data"""
+        return self.history_data.get("grid_import", 0)
+
+    @property
+    def grid_export(self):
+        """Grid export from history data"""
+        return self.history_data.get("grid_export", 0)
+
+    @property
+    def battery_charge(self):
+        """Battery charge from history data"""
+        return self.history_data.get("battery_charge", 0)
+
+    @property
+    def battery_discharge(self):
+        """Battery discharge from history data"""
+        return self.history_data.get("battery_discharge", 0)
+
+    @property
+    def generated(self):
+        """Solar generation from history data"""
+        return self.history_data.get("generated", 0)
 
     @property
     def prefix(self):
@@ -143,15 +171,12 @@ class Libbi(BaseDevice):
 
     async def set_operating_mode(self, mode: str):
         """Stopped or normal mode"""
-        print(f"set mode")
+        print("current mode", self._data["lmo"])
         mode_int = LIBBI_MODES.index(mode.capitalize())
         await self._connection.get(
             f"/cgi-libbi-mode-{self.prefix}{self._serialno}-{mode_int}"
             )
-        if mode_int == 0:
-            self._data["sta"] = 0
-        else:
-            self._data["sta"] = 1
+        self._data["lmo"] = LIBBI_MODE_NAMES[mode_int]
         return True
     
     async def set_priority(self, priority):
@@ -177,9 +202,10 @@ class Libbi(BaseDevice):
         ret = ret + f"Battery size: {self.battery_size}kWh\n"
         ret = ret + f"Inverter size: {self.inverter_size}kWh\n"
         ret = ret + f"State of Charge: {self.state_of_charge}%\n"
-        ret = ret + f"Generated: {self.power_generated}W\n"
+        ret = ret + f"Generating: {self.power_generated}W\n" 
         ret = ret + f"Grid: {self.power_grid}W\n"
         ret = ret + f"Status : {self.status}\n"
+        ret = ret + f"Local Mode : {self.local_mode}\n"
         ret = ret + f"CT 1 {self.ct1.name} {self.ct1.power}W phase {self.ct1.phase}\n"
         ret = ret + f"CT 2 {self.ct2.name} {self.ct2.power}W phase {self.ct2.phase}\n"
         ret = ret + f"CT 3 {self.ct3.name} {self.ct3.power}W phase {self.ct3.phase}\n"
@@ -188,6 +214,4 @@ class Libbi(BaseDevice):
         ret = ret + f"CT 6 {self.ct6.name} {self.ct6.power}W phase {self.ct6.phase}\n"
         for key in self.ct_keys:
             ret = ret + f"Energy {key} {self.history_data.get(key, 0)}Wh\n"
-       
-
         return ret

@@ -80,9 +80,15 @@ async def main(args):
                         sys.exit(f"A mode must be specifed, one of {modes}")
                     await device.set_charge_mode(args.arg[0])
                     print(f"Charging was set to {args.arg[0].capitalize()}")
-                elif args.action == "mode" and args.command in [EDDI, LIBBI]:
+                elif args.action == "mode" and args.command == EDDI:
                     if len(args.arg) < 1 or args.arg[0].capitalize() not in EDDI_MODES:
                         modes = ", ".join(EDDI_MODES)
+                        sys.exit(f"A mode must be specifed, one of {modes}")
+                    await device.set_operating_mode(args.arg[0])
+                    print(f"Operating mode was set to {args.arg[0].capitalize()}")
+                elif args.action == "mode" and args.command == LIBBI:
+                    if len(args.arg) < 1 or args.arg[0].capitalize() not in LIBBI_MODES:
+                        modes = ", ".join(LIBBI_MODES)
                         sys.exit(f"A mode must be specifed, one of {modes}")
                     await device.set_operating_mode(args.arg[0])
                     print(f"Operating mode was set to {args.arg[0].capitalize()}")
@@ -204,7 +210,7 @@ def cli():
         LIBBI, help="use libbi --help for available commands"
     )
     subparser_libbi.add_argument("-s", "--serial", dest="serial", default=None)
-    subparser_libbi.add_argument("action", choices=["show","mode","priority"])
+    subparser_libbi.add_argument("action", choices=["show","mode","priority","energy"])
     subparser_libbi.add_argument("arg", nargs="*")
 
     args = parser.parse_args()

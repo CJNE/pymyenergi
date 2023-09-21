@@ -3,6 +3,7 @@ from pymyenergi.client import MyenergiClient
 from pymyenergi.eddi import Eddi
 from pymyenergi.harvi import Harvi
 from pymyenergi.zappi import Zappi
+from pymyenergi.libbi import Libbi
 
 # All test coroutines will be treated as marked.
 pytestmark = pytest.mark.asyncio
@@ -25,7 +26,7 @@ async def test_init_error(error_on_client_fetch_data):
 async def test_get_all_devices(client_fetch_data_fixture):
     client = MyenergiClient(conn)
     devices = await client.get_devices()
-    assert len(devices) == 5
+    assert len(devices) == 6
 
 
 async def test_get_eddi_devices(client_fetch_data_fixture):
@@ -62,3 +63,10 @@ async def test_1p_harvi_eddi_solar_battery(client_1p_zappi_harvi_solar_battery_f
     assert client.power_battery == 3000
     assert client.power_charging == 2000
     assert client.consumption_home == 16000
+
+
+async def test_get_libbi_devices(client_fetch_data_fixture):
+    client = MyenergiClient(conn)
+    devices = await client.get_devices("libbi")
+    assert len(devices) == 1
+    assert isinstance(devices[0], Libbi)
