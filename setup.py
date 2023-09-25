@@ -20,7 +20,7 @@ setup(
     license="MIT",
     packages=["pymyenergi"],
     python_requires=">=3.6",
-    install_requires=["httpx"],
+    install_requires=["httpx", "pycognito"],
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python",

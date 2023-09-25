@@ -199,7 +199,6 @@ class MyenergiClient:
     def power_battery(self):
         """Battery total power"""
         return self._totals.get(CT_BATTERY, 0)
-    
 
     def find_device_name(self, key, default_value):
         """Find device or site name"""

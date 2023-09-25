@@ -34,7 +34,7 @@ class Libbi(BaseDevice):
     @property
     def kind(self):
         return LIBBI
-        
+
     @property
     def status(self):
         """Get current known status"""
@@ -43,7 +43,7 @@ class Libbi(BaseDevice):
             return STATES[n]
         else:
             return n
-    
+
     @property
     def local_mode(self):
         """Get current known status"""
@@ -68,22 +68,22 @@ class Libbi(BaseDevice):
     def ct3(self):
         """Current transformer 3"""
         return self._create_ct(3)
-    
+
     @property
     def ct4(self):
         """Current transformer 4"""
         return self._create_ct(4)
-    
+
     @property
     def ct5(self):
         """Current transformer 4"""
         return self._create_ct(5)
-    
+
     @property
     def ct6(self):
         """Current transformer 4"""
         return self._create_ct(6)
-    
+
     @property
     def supply_frequency(self):
         """Supply frequency in Hz"""
@@ -118,12 +118,12 @@ class Libbi(BaseDevice):
     def energy_green(self):
         """Device green energy from history data"""
         return self.history_data.get("device_green", 0)
-    
+
     @property
     def state_of_charge(self):
         """State of Charge in %"""
         return self._data.get("soc", 0)
-    
+
     @property
     def priority(self):
         """Current priority"""
@@ -133,7 +133,7 @@ class Libbi(BaseDevice):
     def battery_size(self):
         """Battery size in kwh"""
         return self._data.get("mbc", 0) /1000
-    
+
     @property
     def inverter_size(self):
         """Inverter size in kwh"""
@@ -167,7 +167,7 @@ class Libbi(BaseDevice):
     @property
     def prefix(self):
         return "L"
-    
+
 
     async def set_operating_mode(self, mode: str):
         """Stopped or normal mode"""
@@ -178,7 +178,16 @@ class Libbi(BaseDevice):
             )
         self._data["lmo"] = LIBBI_MODE_NAMES[mode_int]
         return True
-    
+
+    async def set_charge_from_grid(self, charge_from_grid: bool):
+        """Set charge from grid"""
+        await self._connection.put(
+            f"/api/AccountAccess/LibbiMode?chargeFromGrid={charge_from_grid}&serialNo={self._serialno}",
+            oauth=True
+            )
+        self._data["charge_from_grid"] = charge_from_grid
+        return True
+
     async def set_priority(self, priority):
         """Set device priority"""
         await self._connection.get(
@@ -202,7 +211,7 @@ class Libbi(BaseDevice):
         ret = ret + f"Battery size: {self.battery_size}kWh\n"
         ret = ret + f"Inverter size: {self.inverter_size}kWh\n"
         ret = ret + f"State of Charge: {self.state_of_charge}%\n"
-        ret = ret + f"Generating: {self.power_generated}W\n" 
+        ret = ret + f"Generating: {self.power_generated}W\n"
         ret = ret + f"Grid: {self.power_grid}W\n"
         ret = ret + f"Status : {self.status}\n"
         ret = ret + f"Local Mode : {self.local_mode}\n"
