@@ -19,7 +19,11 @@ STATES = { 0:'Off',
            7:'Duration Charging',
            101:'Idle?',
            102:'102',
-           234:'Calibration Charge' }
+           151:'FW Upgrade (ARM)',
+           156:'FW Upgrade (DSP)',
+           234:'Calibration Charge',
+           251:'FW Upgrade (DSP)',
+           252:'FW Upgrade (ARM)' }
 
 LIBBI_MODES = ["Stopped","Normal"]
 LIBBI_MODE_NAMES = ["STOP", "BALANCE"]
