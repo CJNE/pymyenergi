@@ -40,6 +40,7 @@ class Connection:
         self.oauth.authenticate(password=self.app_password)
         self.oauth_headers = {"Authorization": f"Bearer {self.oauth.access_token}"}
         self.do_query_asn = True
+        self.invitation_id = ''
         _LOGGER.debug("New connection created")
 
     def _checkMyenergiServerURL(self, responseHeader):
@@ -54,6 +55,17 @@ class Connection:
             )
             raise WrongCredentials()
 
+    async def discoverLocations(self):
+        locs = await self.get("/api/Locations", oauth=True)
+        # check if guest location - use the first location by default
+        if locs["content"][0]["isGuestLocation"] == True:
+            self.invitation_id = locs["content"][0]["invitationData"]["invitationId"]
+
+    def checkAndUpdateToken(self):
+        # check if we have to renew out token
+        self.oauth.check_token()
+        self.oauth_headers = {"Authorization": f"Bearer {self.oauth.access_token}"}
+
     async def send(self, method, url, json=None, oauth=False):
         # Use OAuth for myaccount.myenergi.com
         if oauth:
@@ -61,6 +73,12 @@ class Connection:
                 headers=self.oauth_headers, timeout=self.timeout
             ) as httpclient:
                 theUrl = self.oauth_base_url + url
+                # if we have an invitiation id, we need to add that to the query
+                if (self.invitation_id != ""):
+                    if ("?" in theUrl):
+                        theUrl = theUrl + "&invitationId=" + self.invitation_id
+                    else:
+                        theUrl = theUrl + "?invitationId=" + self.invitation_id
                 try:
                     _LOGGER.debug(f"{method} {url} {theUrl}")
                     response = await httpclient.request(method, theUrl, json=json)
