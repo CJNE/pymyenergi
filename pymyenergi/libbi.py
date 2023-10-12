@@ -19,12 +19,7 @@ STATES = { 0:'Off',
            7:'Duration Charging',
            101:'Idle?',
            102:'102',
-           104:'Battery Full?',
-           151:'FW Upgrade (ARM)',
-           156:'FW Upgrade (DSP)',
-           234:'Calibration Charge',
-           251:'FW Upgrade (DSP)',
-           252:'FW Upgrade (ARM)' }
+           234:'Calibration Charge' }
 
 LIBBI_MODES = ["Stopped","Normal"]
 LIBBI_MODE_NAMES = ["STOP", "BALANCE"]
@@ -34,12 +29,17 @@ class Libbi(BaseDevice):
 
     def __init__(self, connection: Connection, serialno, data={}) -> None:
         self.history_data = {}
+        self._extra_data = {}
         super().__init__(connection, serialno, data)
+
+    async def refresh_extra(self):
+        chargeFromGrid = await self._connection.get("/api/AccountAccess/LibbiMode?serialNo=" + str(self.serial_number), oauth=True)
+        self._extra_data["charge_from_grid"] = chargeFromGrid["content"][str(self.serial_number)]
 
     @property
     def kind(self):
         return LIBBI
-        
+
     @property
     def status(self):
         """Get current known status"""
@@ -48,7 +48,7 @@ class Libbi(BaseDevice):
             return STATES[n]
         else:
             return n
-    
+
     @property
     def local_mode(self):
         """Get current known status"""
@@ -73,22 +73,22 @@ class Libbi(BaseDevice):
     def ct3(self):
         """Current transformer 3"""
         return self._create_ct(3)
-    
+
     @property
     def ct4(self):
         """Current transformer 4"""
         return self._create_ct(4)
-    
+
     @property
     def ct5(self):
         """Current transformer 4"""
         return self._create_ct(5)
-    
+
     @property
     def ct6(self):
         """Current transformer 4"""
         return self._create_ct(6)
-    
+
     @property
     def supply_frequency(self):
         """Supply frequency in Hz"""
@@ -123,12 +123,12 @@ class Libbi(BaseDevice):
     def energy_green(self):
         """Device green energy from history data"""
         return self.history_data.get("device_green", 0)
-    
+
     @property
     def state_of_charge(self):
         """State of Charge in %"""
         return self._data.get("soc", 0)
-    
+
     @property
     def priority(self):
         """Current priority"""
@@ -138,7 +138,7 @@ class Libbi(BaseDevice):
     def battery_size(self):
         """Battery size in kwh"""
         return self._data.get("mbc", 0) /1000
-    
+
     @property
     def inverter_size(self):
         """Inverter size in kwh"""
@@ -168,11 +168,16 @@ class Libbi(BaseDevice):
     def generated(self):
         """Solar generation from history data"""
         return self.history_data.get("generated", 0)
+    
+    @property
+    def charge_from_grid(self):
+        """Is charging from the grid enabled?"""
+        return self._extra_data.get("charge_from_grid")
 
     @property
     def prefix(self):
         return "L"
-    
+
 
     async def set_operating_mode(self, mode: str):
         """Stopped or normal mode"""
@@ -180,10 +185,19 @@ class Libbi(BaseDevice):
         mode_int = LIBBI_MODES.index(mode.capitalize())
         await self._connection.get(
             f"/cgi-libbi-mode-{self.prefix}{self._serialno}-{mode_int}"
-            )
+        )
         self._data["lmo"] = LIBBI_MODE_NAMES[mode_int]
         return True
-    
+
+    async def set_charge_from_grid(self, charge_from_grid: bool):
+        """Set charge from grid"""
+        await self._connection.put(
+            f"/api/AccountAccess/LibbiMode?chargeFromGrid={charge_from_grid}&serialNo={self._serialno}",
+            oauth=True
+        )
+        self._extra_data["charge_from_grid"] = charge_from_grid
+        return True
+
     async def set_priority(self, priority):
         """Set device priority"""
         await self._connection.get(
@@ -207,10 +221,11 @@ class Libbi(BaseDevice):
         ret = ret + f"Battery size: {self.battery_size}kWh\n"
         ret = ret + f"Inverter size: {self.inverter_size}kWh\n"
         ret = ret + f"State of Charge: {self.state_of_charge}%\n"
-        ret = ret + f"Generating: {self.power_generated}W\n" 
+        ret = ret + f"Generating: {self.power_generated}W\n"
         ret = ret + f"Grid: {self.power_grid}W\n"
         ret = ret + f"Status : {self.status}\n"
         ret = ret + f"Local Mode : {self.local_mode}\n"
+        ret = ret + f"Charge from Grid: {self.charge_from_grid}\n"
         ret = ret + f"CT 1 {self.ct1.name} {self.ct1.power}W phase {self.ct1.phase}\n"
         ret = ret + f"CT 2 {self.ct2.name} {self.ct2.power}W phase {self.ct2.phase}\n"
         ret = ret + f"CT 3 {self.ct3.name} {self.ct3.power}W phase {self.ct3.phase}\n"
