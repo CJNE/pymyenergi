@@ -199,6 +199,7 @@ class MyenergiClient:
     def power_battery(self):
         """Battery total power"""
         return self._totals.get(CT_BATTERY, 0)
+    
 
     def find_device_name(self, key, default_value):
         """Find device or site name"""
@@ -247,11 +248,6 @@ class MyenergiClient:
                         f"Updating {existing_device.kind} {existing_device.name}"
                     )
                     existing_device.data = device_data
-
-                # Update the extra information available on libbi
-                # this is the bit that requires OAuth
-                if existing_device.kind == LIBBI:
-                    await existing_device.refresh_extra()
         self._calculate_totals()
 
     async def refresh_history_today(self):

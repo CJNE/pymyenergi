@@ -27,11 +27,8 @@ logging.root.setLevel(logging.WARNING)
 
 async def main(args):
     username = args.username or input("Please enter your hub serial number: ")
-    password = args.password or getpass(prompt="Password (apikey): ")
-    app_email = args.app_email or input("App email: ")
-    app_password = args.app_password or getpass(prompt="App password: ")
-    conn = Connection(username, password, app_password, app_email)
-    await conn.discoverLocations()
+    password = args.password or getpass()
+    conn = Connection(username, password)
     if args.debug:
         logging.root.setLevel(logging.DEBUG)
     client = MyenergiClient(conn)
@@ -95,11 +92,6 @@ async def main(args):
                         sys.exit(f"A mode must be specifed, one of {modes}")
                     await device.set_operating_mode(args.arg[0])
                     print(f"Operating mode was set to {args.arg[0].capitalize()}")
-                elif args.action == "chargefromgrid" and args.command == LIBBI:
-                    if len(args.arg) < 1 or args.arg[0].capitalize() not in ["True", "False"]:
-                        sys.exit(f"A mode must be specifed, one of true or false")
-                    await device.set_charge_from_grid(args.arg[0])
-                    print(f"Charge from grid was set to {args.arg[0].capitalize()}")
                 elif args.action == "mingreen" and args.command == ZAPPI:
                     if len(args.arg) < 1:
                         sys.exit("A minimum green level must be provided")
@@ -156,7 +148,7 @@ async def main(args):
 
 def cli():
     config = configparser.ConfigParser()
-    config["hub"] = {"serial": "", "password": "", "app_password": "", "app_email": ""}
+    config["hub"] = {"serial": "", "password": ""}
     config.read([".myenergi.cfg", os.path.expanduser("~/.myenergi.cfg")])
     parser = argparse.ArgumentParser(prog="myenergi", description="myenergi CLI.")
     parser.add_argument(
@@ -170,18 +162,6 @@ def cli():
         "--password",
         dest="password",
         default=config.get("hub", "password").strip('"'),
-    )
-    parser.add_argument(
-        "-a",
-        "--app_password",
-        dest="app_password",
-        default=config.get("hub", "app_password").strip('"'),
-    )
-    parser.add_argument(
-        "-e",
-        "--app_email",
-        dest="app_email",
-        default=config.get("hub", "app_email").strip('"'),
     )
     parser.add_argument("-d", "--debug", dest="debug", action="store_true")
     parser.add_argument("-j", "--json", dest="json", action="store_true", default=False)
@@ -230,7 +210,7 @@ def cli():
         LIBBI, help="use libbi --help for available commands"
     )
     subparser_libbi.add_argument("-s", "--serial", dest="serial", default=None)
-    subparser_libbi.add_argument("action", choices=["show","mode","priority","energy","chargefromgrid"])
+    subparser_libbi.add_argument("action", choices=["show","mode","priority","energy"])
     subparser_libbi.add_argument("arg", nargs="*")
 
     args = parser.parse_args()
