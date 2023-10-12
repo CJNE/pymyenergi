@@ -31,6 +31,7 @@ async def main(args):
     app_email = args.app_email or input("App email: ")
     app_password = args.app_password or getpass(prompt="App password: ")
     conn = Connection(username, password, app_password, app_email)
+    await conn.discoverLocations()
     if args.debug:
         logging.root.setLevel(logging.DEBUG)
     client = MyenergiClient(conn)
