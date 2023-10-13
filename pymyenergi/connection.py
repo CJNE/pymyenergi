@@ -56,7 +56,7 @@ class Connection:
             raise WrongCredentials()
 
     async def discoverLocations(self):
-        locs = await self.get("/api/Locations", oauth=True)
+        locs = await self.get("/api/Location", oauth=True)
         # check if guest location - use the first location by default
         if locs["content"][0]["isGuestLocation"] == True:
             self.invitation_id = locs["content"][0]["invitationData"]["invitationId"]
