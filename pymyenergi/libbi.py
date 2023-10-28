@@ -38,6 +38,7 @@ LIBBI_MODE_CONFIG = {
 }
 """The myenergi app defines other modes as well (capture, charge, match), but these cannot be set"""
 
+
 class Libbi(BaseDevice):
     """Libbi Client for myenergi API."""
 
@@ -54,6 +55,11 @@ class Libbi(BaseDevice):
         self._extra_data["charge_from_grid"] = chargeFromGrid["content"][
             str(self.serial_number)
         ]
+        chargeTarget = await self._connection.get(
+            "/api/AccountAccess/" + str(self.serial_number) + "/LibbiChargeSetup",
+            oauth=True,
+        )
+        self._extra_data["charge_target"] = chargeTarget["content"]["energyTarget"]
 
     @property
     def kind(self):
@@ -194,6 +200,11 @@ class Libbi(BaseDevice):
         return self._extra_data.get("charge_from_grid")
 
     @property
+    def charge_target(self):
+        """Libbi charge target"""
+        return self._extra_data.get("charge_target", 0) / 1000
+
+    @property
     def prefix(self):
         return "L"
 
@@ -235,6 +246,15 @@ class Libbi(BaseDevice):
         self._data["pri"] = int(priority)
         return True
 
+    async def set_charge_target(self, charge_target: float):
+        """Set charge target"""
+        await self._connection.put(
+            f"/api/AccountAccess/{self._serialno}/TargetEnergy?targetEnergy={charge_target}",
+            oauth=True,
+        )
+        self._extra_data["charge_target"] = charge_target
+        return True
+
     def show(self, short_format=False):
         """Returns a string with all data in human readable format"""
         ret = ""
@@ -252,13 +272,14 @@ class Libbi(BaseDevice):
         ret = ret + f"State of Charge: {self.state_of_charge}%\n"
         ret = ret + f"Generating: {self.power_generated}W\n"
         ret = ret + f"Grid: {self.power_grid}W\n"
-        ret = ret + f"Status : {self.status}\n"
-        ret = ret + "Local Mode : " + self.get_mode_description(self.local_mode) + "\n"
+        ret = ret + f"Status: {self.status}\n"
+        ret = ret + "Local Mode: " + self.get_mode_description(self.local_mode) + "\n"
         ret = ret + "Charge from Grid: "
         if self.charge_from_grid:
             ret = ret + "Enabled\n"
         else:
             ret = ret + "Disabled\n"
+        ret = ret + f"Charge target: {self.charge_target}kWh\n"
         ret = ret + f"CT 1 {self.ct1.name} {self.ct1.power}W phase {self.ct1.phase}\n"
         ret = ret + f"CT 2 {self.ct2.name} {self.ct2.power}W phase {self.ct2.phase}\n"
         ret = ret + f"CT 3 {self.ct3.name} {self.ct3.power}W phase {self.ct3.phase}\n"

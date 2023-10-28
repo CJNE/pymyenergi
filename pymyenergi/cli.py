@@ -102,9 +102,14 @@ async def main(args):
                         "Enable",
                         "Disable",
                     ]:
-                        sys.exit(f"A mode must be specifed, one of enable or disable")
+                        sys.exit("A mode must be specifed, one of enable or disable")
                     await device.set_charge_from_grid(args.arg[0])
                     print(f"Charge from grid was set to {args.arg[0].capitalize()}")
+                elif args.action == "chargetarget" and args.command == LIBBI:
+                    if len(args.arg) < 1 or not args.arg[0].isnumeric():
+                        sys.exit("The charge target must be specified in Wh")
+                    await device.set_charge_target(args.arg[0])
+                    print(f"Charge target was set to {args.arg[0]}Wh")
                 elif args.action == "mingreen" and args.command == ZAPPI:
                     if len(args.arg) < 1:
                         sys.exit("A minimum green level must be provided")
@@ -236,7 +241,15 @@ def cli():
     )
     subparser_libbi.add_argument("-s", "--serial", dest="serial", default=None)
     subparser_libbi.add_argument(
-        "action", choices=["show", "mode", "priority", "energy", "chargefromgrid"]
+        "action",
+        choices=[
+            "show",
+            "mode",
+            "priority",
+            "energy",
+            "chargefromgrid",
+            "chargetarget",
+        ],
     )
     subparser_libbi.add_argument("arg", nargs="*")
 
