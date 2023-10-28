@@ -103,7 +103,16 @@ async def main(args):
                         "Disable",
                     ]:
                         sys.exit("A mode must be specifed, one of enable or disable")
-                    await device.set_charge_from_grid(args.arg[0])
+                    if args.arg[0].capitalize() in [
+                        "Enable",
+                        "Disable",
+                    ]:
+                        if args.arg[0].capitalize() == "Enable":
+                            await device.set_charge_from_grid(True)
+                        else:
+                            await device.set_charge_from_grid(False)
+                    else:
+                        await device.set_charge_from_grid(args.arg[0])
                     print(f"Charge from grid was set to {args.arg[0].capitalize()}")
                 elif args.action == "chargetarget" and args.command == LIBBI:
                     if len(args.arg) < 1 or not args.arg[0].isnumeric():

@@ -227,10 +227,6 @@ class Libbi(BaseDevice):
 
     async def set_charge_from_grid(self, charge_from_grid: bool):
         """Set charge from grid"""
-        if charge_from_grid.capitalize() in ["Enable", "Disable"]:
-            charge_from_grid = (
-                "True" if charge_from_grid.capitalize() == "Enable" else "False"
-            )
         await self._connection.put(
             f"/api/AccountAccess/LibbiMode?chargeFromGrid={charge_from_grid}&serialNo={self._serialno}",
             oauth=True,
