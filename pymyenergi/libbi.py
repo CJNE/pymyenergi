@@ -7,27 +7,36 @@ from .base_device import BaseDevice
 
 _LOGGER = logging.getLogger(__name__)
 
-MODE_NORMAL = 1
-MODE_STOPPED = 0
+STATES = {
+    0: "Off",
+    1: "On",
+    2: "Battery Full",
+    4: "Idle",
+    5: "Charging",
+    6: "Discharging",
+    7: "Duration Charging",
+    8: "Duration Drain",
+    51: "Boosting",
+    53: "Boosting",
+    55: "Boosting",
+    11: "Stopped",
+    101: "Idle?",
+    102: "Full",
+    104: "Full",
+    151: "FW Upgrade (ARM)",
+    156: "FW Upgrade (DSP)",
+    234: "Calibration Charge",
+    251: "FW Upgrade (DSP)",
+    252: "FW Upgrade (ARM)",
+}
 
-STATES = { 0:'Off',
-           1:'On',
-           2:'Battery Full',
-           4:'Idle',
-           5:'Charging',
-           6:'Discharging',
-           7:'Duration Charging',
-           101:'Idle?',
-           102:'102',
-           104:'Battery Full?',
-           151:'FW Upgrade (ARM)',
-           156:'FW Upgrade (DSP)',
-           234:'Calibration Charge',
-           251:'FW Upgrade (DSP)',
-           252:'FW Upgrade (ARM)' }
-
-LIBBI_MODES = ["Stopped","Normal"]
-LIBBI_MODE_NAMES = ["STOP", "BALANCE"]
+LIBBI_MODES = ["Stopped", "Normal", "Export"]
+LIBBI_MODE_CONFIG = {
+    "Stopped": {"mode_int": 0, "mode_name": "STOP"},
+    "Normal": {"mode_int": 1, "mode_name": "BALANCE"},
+    "Export": {"mode_int": 5, "mode_name": "DRAIN"},
+}
+"""The myenergi app defines other modes as well (capture, charge, match), but these cannot be set"""
 
 class Libbi(BaseDevice):
     """Libbi Client for myenergi API."""
@@ -38,8 +47,13 @@ class Libbi(BaseDevice):
         super().__init__(connection, serialno, data)
 
     async def refresh_extra(self):
-        chargeFromGrid = await self._connection.get("/api/AccountAccess/LibbiMode?serialNo=" + str(self.serial_number), oauth=True)
-        self._extra_data["charge_from_grid"] = chargeFromGrid["content"][str(self.serial_number)]
+        chargeFromGrid = await self._connection.get(
+            "/api/AccountAccess/LibbiMode?serialNo=" + str(self.serial_number),
+            oauth=True,
+        )
+        self._extra_data["charge_from_grid"] = chargeFromGrid["content"][
+            str(self.serial_number)
+        ]
 
     @property
     def kind(self):
@@ -142,12 +156,12 @@ class Libbi(BaseDevice):
     @property
     def battery_size(self):
         """Battery size in kwh"""
-        return self._data.get("mbc", 0) /1000
+        return self._data.get("mbc", 0) / 1000
 
     @property
     def inverter_size(self):
         """Inverter size in kwh"""
-        return self._data.get("mic", 0) /1000
+        return self._data.get("mic", 0) / 1000
 
     @property
     def grid_import(self):
@@ -173,7 +187,7 @@ class Libbi(BaseDevice):
     def generated(self):
         """Solar generation from history data"""
         return self.history_data.get("generated", 0)
-    
+
     @property
     def charge_from_grid(self):
         """Is charging from the grid enabled?"""
@@ -183,22 +197,32 @@ class Libbi(BaseDevice):
     def prefix(self):
         return "L"
 
+    def get_mode_description(self, mode: str):
+        """Get the mode name as returned by myenergi API. E.g. Normal mode is BALANCE"""
+        for k in LIBBI_MODE_CONFIG:
+            if LIBBI_MODE_CONFIG[k]["mode_name"] == mode:
+                return k
+        return "???"
 
     async def set_operating_mode(self, mode: str):
-        """Stopped or normal mode"""
-        print("current mode", self._data["lmo"])
-        mode_int = LIBBI_MODES.index(mode.capitalize())
+        """Set operating mode"""
+        print("current mode", self.get_mode_description(self._data["lmo"]))
+        mode_int = LIBBI_MODE_CONFIG[mode.capitalize()]["mode_int"]
         await self._connection.get(
             f"/cgi-libbi-mode-{self.prefix}{self._serialno}-{mode_int}"
         )
-        self._data["lmo"] = LIBBI_MODE_NAMES[mode_int]
+        self._data["lmo"] = LIBBI_MODE_CONFIG[mode.capitalize()]["mode_name"]
         return True
 
     async def set_charge_from_grid(self, charge_from_grid: bool):
         """Set charge from grid"""
+        if charge_from_grid.capitalize() in ["Enable", "Disable"]:
+            charge_from_grid = (
+                "True" if charge_from_grid.capitalize() == "Enable" else "False"
+            )
         await self._connection.put(
             f"/api/AccountAccess/LibbiMode?chargeFromGrid={charge_from_grid}&serialNo={self._serialno}",
-            oauth=True
+            oauth=True,
         )
         self._extra_data["charge_from_grid"] = charge_from_grid
         return True
@@ -229,8 +253,12 @@ class Libbi(BaseDevice):
         ret = ret + f"Generating: {self.power_generated}W\n"
         ret = ret + f"Grid: {self.power_grid}W\n"
         ret = ret + f"Status : {self.status}\n"
-        ret = ret + f"Local Mode : {self.local_mode}\n"
-        ret = ret + f"Charge from Grid: {self.charge_from_grid}\n"
+        ret = ret + "Local Mode : " + self.get_mode_description(self.local_mode) + "\n"
+        ret = ret + "Charge from Grid: "
+        if self.charge_from_grid:
+            ret = ret + "Enabled\n"
+        else:
+            ret = ret + "Disabled\n"
         ret = ret + f"CT 1 {self.ct1.name} {self.ct1.power}W phase {self.ct1.phase}\n"
         ret = ret + f"CT 2 {self.ct2.name} {self.ct2.power}W phase {self.ct2.phase}\n"
         ret = ret + f"CT 3 {self.ct3.name} {self.ct3.power}W phase {self.ct3.phase}\n"
