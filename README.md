@@ -148,13 +148,14 @@ loop.run_until_complete(get_data())
 ```
 
 ## Libbi support
-Very early and basic support of Libbi.
+Currently supported features:
 
 - Reads a few values such as State of Charge, DCPV CT
 - Battery in and out energy
 - Gets and sets the current operating mode (normal/stopped/export)
 - Change priority of Libbi
 - Enable/Disable charging from the grid
+- Set charge target (in Wh)
 
 cli examples:
 ```
@@ -162,7 +163,8 @@ myenergi libbi show
 myenergi libbi mode normal
 myenergi libbi priority 1
 myenergi libbi energy
-myenergi libbi chargefromgrid disable
+myenergi libbi chargefromgrid false
+myenergi libbi chargetarget 10200
 ```
 
 
