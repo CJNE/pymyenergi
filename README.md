@@ -163,7 +163,7 @@ myenergi libbi show
 myenergi libbi mode normal
 myenergi libbi priority 1
 myenergi libbi energy
-myenergi libbi chargefromgrid disable
+myenergi libbi chargefromgrid false
 myenergi libbi chargetarget 10200
 ```
 
