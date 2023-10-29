@@ -16,6 +16,7 @@ STATES = {
     6: "Discharging",
     7: "Duration Charging",
     8: "Duration Drain",
+    12: "Target Charge",
     51: "Boosting",
     53: "Boosting",
     55: "Boosting",
