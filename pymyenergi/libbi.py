@@ -26,6 +26,7 @@ STATES = {
     104: "Full",
     151: "FW Upgrade (ARM)",
     156: "FW Upgrade (DSP)",
+    172: "BMS Charge Temperature Low",
     234: "Calibration Charge",
     251: "FW Upgrade (DSP)",
     252: "FW Upgrade (ARM)",
