@@ -21,7 +21,7 @@ STATES = {
     53: "Boosting",
     55: "Boosting",
     11: "Stopped",
-    101: "Idle?",
+    101: "Battery Empty",
     102: "Full",
     104: "Full",
     151: "FW Upgrade (ARM)",
@@ -50,18 +50,20 @@ class Libbi(BaseDevice):
         super().__init__(connection, serialno, data)
 
     async def refresh_extra(self):
-        chargeFromGrid = await self._connection.get(
-            "/api/AccountAccess/LibbiMode?serialNo=" + str(self.serial_number),
-            oauth=True,
-        )
-        self._extra_data["charge_from_grid"] = chargeFromGrid["content"][
-            str(self.serial_number)
-        ]
-        chargeTarget = await self._connection.get(
-            "/api/AccountAccess/" + str(self.serial_number) + "/LibbiChargeSetup",
-            oauth=True,
-        )
-        self._extra_data["charge_target"] = chargeTarget["content"]["energyTarget"]
+        # only refresh this data if we have app credentials
+        if self._connection.app_email and self._connection.app_password:
+            chargeFromGrid = await self._connection.get(
+                "/api/AccountAccess/LibbiMode?serialNo=" + str(self.serial_number),
+                oauth=True,
+            )
+            self._extra_data["charge_from_grid"] = chargeFromGrid["content"][
+                str(self.serial_number)
+            ]
+            chargeTarget = await self._connection.get(
+                "/api/AccountAccess/" + str(self.serial_number) + "/LibbiChargeSetup",
+                oauth=True,
+            )
+            self._extra_data["charge_target"] = chargeTarget["content"]["energyTarget"]
 
     @property
     def kind(self):
@@ -286,4 +288,6 @@ class Libbi(BaseDevice):
         ret = ret + f"CT 6 {self.ct6.name} {self.ct6.power}W phase {self.ct6.phase}\n"
         for key in self.ct_keys:
             ret = ret + f"Energy {key} {self.history_data.get(key, 0)}Wh\n"
+        if not self._connection.app_email or not self._connection.app_password:
+            ret += "No app credentials provided - the above information might not be totally accurate\n"
         return ret
