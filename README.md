@@ -61,6 +61,8 @@ optional arguments:
   -h, --help            show this help message and exit
   -u USERNAME, --username USERNAME
   -p PASSWORD, --password PASSWORD
+  -e APP_EMAIL, --app_email APP_EMAIL
+  -a APP_PASSWORD, --app_password APP_PASSWORD
   -d, --debug
   -j, --json
 ```

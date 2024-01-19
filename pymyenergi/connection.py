@@ -36,9 +36,10 @@ class Connection:
         self.app_email = app_email
         self.auth = httpx.DigestAuth(self.username, self.password)
         self.headers = {"User-Agent": "Wget/1.14 (linux-gnu)"}
-        self.oauth = Cognito(_USER_POOL_ID, _CLIENT_ID, username=self.app_email)
-        self.oauth.authenticate(password=self.app_password)
-        self.oauth_headers = {"Authorization": f"Bearer {self.oauth.access_token}"}
+        if self.app_email and app_password:
+            self.oauth = Cognito(_USER_POOL_ID, _CLIENT_ID, username=self.app_email)
+            self.oauth.authenticate(password=self.app_password)
+            self.oauth_headers = {"Authorization": f"Bearer {self.oauth.access_token}"}
         self.do_query_asn = True
         self.invitation_id = ''
         _LOGGER.debug("New connection created")
@@ -62,35 +63,41 @@ class Connection:
             self.invitation_id = locs["content"][0]["invitationData"]["invitationId"]
 
     def checkAndUpdateToken(self):
-        # check if we have to renew out token
-        self.oauth.check_token()
-        self.oauth_headers = {"Authorization": f"Bearer {self.oauth.access_token}"}
+        # check if we have oauth credentials
+        if self.app_email and self.app_password:
+            # check if we have to renew out token
+            self.oauth.check_token()
+            self.oauth_headers = {"Authorization": f"Bearer {self.oauth.access_token}"}
 
     async def send(self, method, url, json=None, oauth=False):
         # Use OAuth for myaccount.myenergi.com
         if oauth:
-            async with httpx.AsyncClient(
-                headers=self.oauth_headers, timeout=self.timeout
-            ) as httpclient:
-                theUrl = self.oauth_base_url + url
-                # if we have an invitiation id, we need to add that to the query
-                if (self.invitation_id != ""):
-                    if ("?" in theUrl):
-                        theUrl = theUrl + "&invitationId=" + self.invitation_id
+            # check if we have oauth credentials
+            if self.app_email and self.app_password:
+                async with httpx.AsyncClient(
+                    headers=self.oauth_headers, timeout=self.timeout
+                ) as httpclient:
+                    theUrl = self.oauth_base_url + url
+                    # if we have an invitiation id, we need to add that to the query
+                    if (self.invitation_id != ""):
+                        if ("?" in theUrl):
+                            theUrl = theUrl + "&invitationId=" + self.invitation_id
+                        else:
+                            theUrl = theUrl + "?invitationId=" + self.invitation_id
+                    try:
+                        _LOGGER.debug(f"{method} {url} {theUrl}")
+                        response = await httpclient.request(method, theUrl, json=json)
+                    except httpx.ReadTimeout:
+                        raise TimeoutException()
                     else:
-                        theUrl = theUrl + "?invitationId=" + self.invitation_id
-                try:
-                    _LOGGER.debug(f"{method} {url} {theUrl}")
-                    response = await httpclient.request(method, theUrl, json=json)
-                except httpx.ReadTimeout:
-                    raise TimeoutException()
-                else:
-                    _LOGGER.debug(f"{method} status {response.status_code}")
-                    if response.status_code == 200:
-                        return response.json()
-                    elif response.status_code == 401:
-                        raise WrongCredentials()
-                    raise MyenergiException(response.status_code)
+                        _LOGGER.debug(f"{method} status {response.status_code}")
+                        if response.status_code == 200:
+                            return response.json()
+                        elif response.status_code == 401:
+                            raise WrongCredentials()
+                        raise MyenergiException(response.status_code)
+            else:
+                _LOGGER.error("Trying to use OAuth without app credentials")
 
         # Use Digest Auth for director.myenergi.net and s18.myenergi.net
         else:

@@ -28,10 +28,14 @@ logging.root.setLevel(logging.WARNING)
 async def main(args):
     username = args.username or input("Please enter your hub serial number: ")
     password = args.password or getpass(prompt="Password (apikey): ")
-    app_email = args.app_email or input("App email: ")
-    app_password = args.app_password or getpass(prompt="App password: ")
+    app_email = args.app_email or input("App email (enter to skip; only needed for libbi): ")
+    if app_email:
+        app_password = args.app_password or getpass(prompt="App password: ")
+    else:
+        app_password = ''
     conn = Connection(username, password, app_password, app_email)
-    await conn.discoverLocations()
+    if app_email and app_password:
+        await conn.discoverLocations()
     if args.debug:
         logging.root.setLevel(logging.DEBUG)
     client = MyenergiClient(conn)
