@@ -26,7 +26,7 @@ Setup will add a cli under the name myenergicli, see below for usage
 
 A simple cli is provided with this library.
 
-If no username or password is supplied as input arguments and no configuration file is found you will be prompted.
+If no username, password, app_email or app_password is supplied as input arguments and no configuration file is found you will be prompted.
 Conifguration file will be searched for in ./.myenergi.cfg and ~/.myenergi.cfg
 
 ### Example configuration file
@@ -35,18 +35,20 @@ Conifguration file will be searched for in ./.myenergi.cfg and ~/.myenergi.cfg
 [hub]
 serial=12345678
 password=yourpassword
+app_email=myemail@email.com
+app_password=yourapppassword
 ```
 
 ### CLI usage
 
 ```
-usage: myenergi [-h] [-u USERNAME] [-p PASSWORD] [-d] [-j]
-                {list,overview,zappi,eddi,harvi} ...
+usage: myenergi [-h] [-u USERNAME] [-p PASSWORD] [-e APP_EMAIL] [-a APP_PASSWORD] [-d] [-j]
+                {list,overview,zappi,eddi,harvi,libbi} ...
 
 myenergi CLI.
 
 positional arguments:
-  {list,overview,zappi,eddi,harvi}
+  {list,overview,zappi,eddi,harvi,libbi}
                         sub-command help
     list                list devices
     overview            show overview
@@ -59,6 +61,8 @@ optional arguments:
   -h, --help            show this help message and exit
   -u USERNAME, --username USERNAME
   -p PASSWORD, --password PASSWORD
+  -e APP_EMAIL, --app_email APP_EMAIL
+  -a APP_PASSWORD, --app_password APP_PASSWORD
   -d, --debug
   -j, --json
 ```
@@ -146,20 +150,23 @@ loop.run_until_complete(get_data())
 ```
 
 ## Libbi support
-Very early and basic support of Libbi.
+Currently supported features:
 
 - Reads a few values such as State of Charge, DCPV CT
 - Battery in and out energy
-- Gets and sets the current status
+- Gets and sets the current operating mode (normal/stopped/export)
 - Change priority of Libbi
+- Enable/Disable charging from the grid
+- Set charge target (in Wh)
 
 cli examples:
 ```
 myenergi libbi show
 myenergi libbi mode normal
-myenergi libbi mode stop
 myenergi libbi priority 1
 myenergi libbi energy
+myenergi libbi chargefromgrid false
+myenergi libbi chargetarget 10200
 ```
 
 
