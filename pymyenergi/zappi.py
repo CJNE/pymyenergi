@@ -205,7 +205,7 @@ class Zappi(BaseDevice):
         """Boost amount of energy to add"""
         return self._data.get("tbk", -1)
 
-    # The following propterties are have unknown purpose, names will change once known
+    # The following properties are have unknown purpose, names will change once known
     @property
     def bst(self):
         return self._data.get("bst")
