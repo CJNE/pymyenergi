@@ -14,7 +14,7 @@ PLUG_STATES = {
     "F": "Fault",
     "U": "",
 }
-
+SINGLE_PHASE = "SINGLE_PHASE"
 
 class Zappi(BaseDevice):
     """Zappi Client for myenergi API."""
@@ -179,7 +179,7 @@ class Zappi(BaseDevice):
     def energy_boost(self):
         """Device boosted energy from history data"""
         return self.history_data.get("boost_total", 0)
-    
+
     @property
     def energy_green(self):
         """Device green energy from history data"""
@@ -248,6 +248,14 @@ class Zappi(BaseDevice):
         return self._data.get("zsl")
 
     @property
+    def num_phases(self):
+        phases = self._data.get("phaseSetting", 1)
+        if phases == SINGLE_PHASE:
+            return 1
+        else:
+            return 3
+
+    @property
     def update_available(self):
         return self._data.get("newBootloaderAvailable", False)
 
@@ -273,7 +281,7 @@ class Zappi(BaseDevice):
         ret = ret + f"Locked: {self.locked}\n"
         ret = ret + f"Charge added: {self.charge_added}\n"
         ret = ret + f"Priority: {self.priority}\n"
-        ret = ret + f"Charge mode: {self.charge_mode}\n"
+        ret = ret + f"Charge mode: {self.charge_mode} {self.num_phases} phase\n"
         ret = ret + f"PWM: {self.pwm}%\n"
         ret = ret + "\n"
         ret = ret + f"Lock when plugged in   : {self.lock_when_pluggedin}\n"
