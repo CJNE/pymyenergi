@@ -27,7 +27,7 @@ Setup will add a cli under the name myenergicli, see below for usage
 A simple cli is provided with this library.
 
 If no username, password, app_email or app_password is supplied as input arguments and no configuration file is found you will be prompted.
-Conifguration file will be searched for in ./.myenergi.cfg and ~/.myenergi.cfg
+Configuration file will be searched for in ./.myenergi.cfg and ~/.myenergi.cfg
 
 ### Example configuration file
 
