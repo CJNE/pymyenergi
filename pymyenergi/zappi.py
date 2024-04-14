@@ -323,7 +323,7 @@ class Zappi(BaseDevice):
 
     async def stop_boost(self):
         """Stop charge"""
-        await self._connection.get(f"/cgi-zappi-mode-Z{self._serialno}-2-0-0-0000")
+        await self._connection.get(f"/cgi-zappi-mode-Z{self._serialno}-0-2-0-0000")
         return True
 
     async def set_charge_mode(self, mode):
