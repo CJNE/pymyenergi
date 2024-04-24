@@ -1,6 +1,6 @@
 # pymyenergi
 
-An async python library for myenergi API
+An async Python library for myenergi API
 
 This is a very early release, things are changing rapidly so use at your own risk!
 
