@@ -157,6 +157,7 @@ loop.run_until_complete(get_data())
 ```
 
 ## Libbi support
+
 Currently supported features:
 
 - Reads a few values such as State of Charge, DCPV CT
@@ -167,6 +168,7 @@ Currently supported features:
 - Set charge target (in Wh)
 
 CLI examples:
+
 ```bash
 myenergi libbi show
 myenergi libbi mode normal
@@ -177,4 +179,5 @@ myenergi libbi chargetarget 10200
 ```
 
 ## Credits
+
 [twonk](https://github.com/twonk/MyEnergi-App-Api) for documenting the unofficial API
