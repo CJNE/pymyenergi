@@ -9,9 +9,17 @@ This is a very early release, things are changing rapidly so use at your own ris
 
 ## Installation
 
-The easiest method is to install using pip3/pip (venv is also a good idea):
+The easiest method is to install using pip (`pip`/`pip3`):
 
 ```bash
+pip install pymyenergi
+```
+
+Installing within a [Python virtual environment](https://docs.python.org/3/library/venv.html) is often a good idea:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
 pip install pymyenergi
 ```
 
@@ -21,7 +29,7 @@ To update to the latest version:
 pip install pymyenergi -U
 ```
 
-Setup will add a CLI under the name myenergicli. See below for usage.
+Setup will add a CLI under the name `myenergicli`. See below for usage.
 
 ## CLI
 
