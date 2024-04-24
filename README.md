@@ -10,13 +10,13 @@ _NOTE:_ This work is not officially supported by myenergi and functionality can 
 
 The easiest method is to install using pip3/pip (venv is also a good idea)
 
-```
+```bash
 pip install pymyenergi
 ```
 
 to update to the latest version
 
-```
+```bash
 pip install pymyenergi -U
 ```
 
@@ -31,7 +31,7 @@ Configuration file will be searched for in ./.myenergi.cfg and ~/.myenergi.cfg
 
 ### Example configuration file
 
-```
+```ini
 [hub]
 serial=12345678
 password=yourpassword
@@ -73,7 +73,7 @@ Install pymyenergi using pip (requires python > 3.6)
 
 ### Example client usage
 
-```
+```python
 import asyncio
 from pymyenergi.connection import Connection
 from pymyenergi.client import MyenergiClient
@@ -100,7 +100,7 @@ loop.run_until_complete(zappis())
 
 ### Example client usage - Zappi
 
-```
+```python
 import asyncio
 from pymyenergi.connection import Connection
 from pymyenergi.zappi import Zappi
@@ -160,7 +160,7 @@ Currently supported features:
 - Set charge target (in Wh)
 
 cli examples:
-```
+```bash
 myenergi libbi show
 myenergi libbi mode normal
 myenergi libbi priority 1
