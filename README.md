@@ -150,6 +150,7 @@ loop.run_until_complete(get_data())
 ```
 
 ## Libbi support
+
 Currently supported features:
 
 - Reads a few values such as State of Charge, DCPV CT
@@ -160,6 +161,7 @@ Currently supported features:
 - Set charge target (in Wh)
 
 cli examples:
+
 ```
 myenergi libbi show
 myenergi libbi mode normal
@@ -168,8 +170,6 @@ myenergi libbi energy
 myenergi libbi chargefromgrid false
 myenergi libbi chargetarget 10200
 ```
-
-
 
 ## Credits
 

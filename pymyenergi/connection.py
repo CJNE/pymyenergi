@@ -8,7 +8,6 @@ import sys
 from typing import Text
 
 import httpx
-
 from pycognito import Cognito
 
 from .exceptions import MyenergiException
@@ -16,14 +15,20 @@ from .exceptions import TimeoutException
 from .exceptions import WrongCredentials
 
 _LOGGER = logging.getLogger(__name__)
-_USER_POOL_ID = 'eu-west-2_E57cCJB20'
-_CLIENT_ID = '2fup0dhufn5vurmprjkj599041'
+_USER_POOL_ID = "eu-west-2_E57cCJB20"
+_CLIENT_ID = "2fup0dhufn5vurmprjkj599041"
+
 
 class Connection:
     """Connection to myenergi API."""
 
     def __init__(
-        self, username: Text = None, password: Text = None, app_password: Text = None, app_email: Text = None, timeout: int = 20
+        self,
+        username: Text = None,
+        password: Text = None,
+        app_password: Text = None,
+        app_email: Text = None,
+        timeout: int = 20,
     ) -> None:
         """Initialize connection object."""
         self.timeout = timeout
@@ -41,7 +46,7 @@ class Connection:
             self.oauth.authenticate(password=self.app_password)
             self.oauth_headers = {"Authorization": f"Bearer {self.oauth.access_token}"}
         self.do_query_asn = True
-        self.invitation_id = ''
+        self.invitation_id = ""
         _LOGGER.debug("New connection created")
 
     def _checkMyenergiServerURL(self, responseHeader):
@@ -79,8 +84,8 @@ class Connection:
                 ) as httpclient:
                     theUrl = self.oauth_base_url + url
                     # if we have an invitiation id, we need to add that to the query
-                    if (self.invitation_id != ""):
-                        if ("?" in theUrl):
+                    if self.invitation_id != "":
+                        if "?" in theUrl:
                             theUrl = theUrl + "&invitationId=" + self.invitation_id
                         else:
                             theUrl = theUrl + "?invitationId=" + self.invitation_id

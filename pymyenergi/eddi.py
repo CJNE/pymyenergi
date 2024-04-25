@@ -55,7 +55,7 @@ class Eddi(BaseDevice):
 
     @property
     def hsk(self):
-        """ Heatsink temperature """
+        """Heatsink temperature"""
         val = self._data.get("hsk", None)
         if val is not None:
             val = val / 10
