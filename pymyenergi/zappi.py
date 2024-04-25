@@ -14,7 +14,11 @@ PLUG_STATES = {
     "F": "Fault",
     "U": "",
 }
-SINGLE_PHASE = "SINGLE_PHASE"
+PHASES_STATES = {
+    "SINGLE_PHASE" : "1",
+    "THREE_PHASE" : "3",
+    "AUTO" : "auto",
+}
 
 class Zappi(BaseDevice):
     """Zappi Client for myenergi API."""
@@ -249,11 +253,7 @@ class Zappi(BaseDevice):
 
     @property
     def num_phases(self):
-        phases = self._data.get("phaseSetting", 1)
-        if phases == SINGLE_PHASE:
-            return 1
-        else:
-            return 3
+        return PHASES_STATES.get(self._data.get("phaseSetting", "1"), "")
 
     @property
     def update_available(self):
