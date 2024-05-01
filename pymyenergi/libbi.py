@@ -82,10 +82,6 @@ class Libbi(BaseDevice):
         return self._data.get("lmo", 1)
 
     @property
-    def prefix(self):
-        return "E"
-
-    @property
     def ct_keys(self):
         """Return CT key names that are not none"""
         keys = {}

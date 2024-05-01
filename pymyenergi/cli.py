@@ -13,13 +13,13 @@ from pymyenergi.connection import Connection
 from pymyenergi.eddi import BOOST_TARGETS
 from pymyenergi.eddi import EDDI_MODES
 from pymyenergi.exceptions import WrongCredentials
-from pymyenergi.zappi import CHARGE_MODES
 from pymyenergi.libbi import LIBBI_MODES
+from pymyenergi.zappi import CHARGE_MODES
 
 from . import EDDI
 from . import HARVI
-from . import ZAPPI
 from . import LIBBI
+from . import ZAPPI
 
 logging.basicConfig()
 logging.root.setLevel(logging.WARNING)
