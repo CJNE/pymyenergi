@@ -2,8 +2,8 @@ import pytest
 from pymyenergi.client import MyenergiClient
 from pymyenergi.eddi import Eddi
 from pymyenergi.harvi import Harvi
-from pymyenergi.zappi import Zappi
 from pymyenergi.libbi import Libbi
+from pymyenergi.zappi import Zappi
 
 # All test coroutines will be treated as marked.
 pytestmark = pytest.mark.asyncio

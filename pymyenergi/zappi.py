@@ -16,6 +16,7 @@ PLUG_STATES = {
 }
 SINGLE_PHASE = "SINGLE_PHASE"
 
+
 class Zappi(BaseDevice):
     """Zappi Client for myenergi API."""
 

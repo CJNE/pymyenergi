@@ -12,8 +12,8 @@ from . import DEVICE_TYPES
 from . import EDDI
 from . import FREQUENCY_GRID
 from . import HARVI
-from . import LIBBI
 from . import HOUR
+from . import LIBBI
 from . import VOLTAGE_GRID
 from . import ZAPPI
 from .eddi import Eddi

@@ -8,7 +8,6 @@ import sys
 from typing import Text
 
 import httpx
-
 from pycognito import Cognito
 
 from .exceptions import MyenergiException
@@ -18,6 +17,7 @@ from .exceptions import WrongCredentials
 _LOGGER = logging.getLogger(__name__)
 _USER_POOL_ID = 'eu-west-2_E57cCJB20'
 _CLIENT_ID = '2fup0dhufn5vurmprjkj599041'
+
 
 class Connection:
     """Connection to myenergi API."""
@@ -36,7 +36,7 @@ class Connection:
         self.app_email = app_email
         self.auth = httpx.DigestAuth(self.username, self.password)
         self.headers = {"User-Agent": "Wget/1.14 (linux-gnu)"}
-        if self.app_email and app_password:
+        if self.app_email and self.app_password:
             self.oauth = Cognito(_USER_POOL_ID, _CLIENT_ID, username=self.app_email)
             self.oauth.authenticate(password=self.app_password)
             self.oauth_headers = {"Authorization": f"Bearer {self.oauth.access_token}"}
@@ -57,10 +57,11 @@ class Connection:
             raise WrongCredentials()
 
     async def discoverLocations(self):
-        locs = await self.get("/api/Location", oauth=True)
-        # check if guest location - use the first location by default
-        if locs["content"][0]["isGuestLocation"] == True:
-            self.invitation_id = locs["content"][0]["invitationData"]["invitationId"]
+        if self.app_email and self.app_password:
+            locs = await self.get("/api/Location", oauth=True)
+            # check if guest location - use the first location by default
+            if locs["content"][0]["isGuestLocation"] == True:
+                self.invitation_id = locs["content"][0]["invitationData"]["invitationId"]
 
     def checkAndUpdateToken(self):
         # check if we have oauth credentials
