@@ -1,11 +1,7 @@
-import logging
-
 from pymyenergi.connection import Connection
 
 from . import LIBBI
 from .base_device import BaseDevice
-
-_LOGGER = logging.getLogger(__name__)
 
 STATES = {
     0: "Off",
@@ -27,9 +23,11 @@ STATES = {
     151: "FW Upgrade (ARM)",
     156: "FW Upgrade (DSP)",
     172: "BMS Charge Temperature Low",
+    176: "BMS Updating",
     234: "Calibration Charge",
     251: "FW Upgrade (DSP)",
     252: "FW Upgrade (ARM)",
+    253: "BMS Upgrading"
 }
 
 LIBBI_MODES = ["Stopped", "Normal", "Export"]
