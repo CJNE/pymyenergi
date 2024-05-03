@@ -27,6 +27,7 @@ class Zappi(BaseDevice):
     async def refresh(self):
         """Refresh device data"""
         self.data = await self.fetch_data()
+        self.boost_data = await self.fetch_boost_data()
 
     async def fetch_boost_data(self):
         """Fetch data from myenergi"""
