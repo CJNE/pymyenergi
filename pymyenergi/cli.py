@@ -28,11 +28,15 @@ logging.root.setLevel(logging.WARNING)
 async def main(args):
     username = args.username or input("Please enter your hub serial number: ")
     password = args.password or getpass(prompt="Password (apikey): ")
-    app_email = args.app_email or input("App email (enter to skip; only needed for libbi): ")
-    if app_email:
-        app_password = args.app_password or getpass(prompt="App password: ")
+    if not args.skip_oauth:
+        app_email = args.app_email or input("App email (enter to skip; only needed for libbi): ")
+        if app_email:
+            app_password = args.app_password or getpass(prompt="App password: ")
+        else:
+            app_password = ""
     else:
-        app_password = ''
+        app_email = ""
+        app_password = ""
     conn = Connection(username, password, app_password, app_email)
     if app_email and app_password:
         await conn.discoverLocations()
@@ -195,6 +199,7 @@ def cli():
         dest="app_email",
         default=config.get("hub", "app_email").strip('"'),
     )
+    parser.add_argument("--skip-oauth", dest="skip_oauth", action="store_true", default=False)
     parser.add_argument("-d", "--debug", dest="debug", action="store_true")
     parser.add_argument("-j", "--json", dest="json", action="store_true", default=False)
     parser.add_argument("--version", dest="version", action="store_true", default=False)
