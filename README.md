@@ -42,7 +42,7 @@ app_password=yourapppassword
 ### CLI usage
 
 ```
-usage: myenergi [-h] [-u USERNAME] [-p PASSWORD] [-e APP_EMAIL] [-a APP_PASSWORD] [-d] [-j]
+usage: myenergi [-h] [-u USERNAME] [-p PASSWORD] [-e APP_EMAIL] [-a APP_PASSWORD] [-d] [-j] [--skip-oauth]
                 {list,overview,zappi,eddi,harvi,libbi} ...
 
 myenergi CLI.
