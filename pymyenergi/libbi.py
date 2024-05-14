@@ -27,7 +27,7 @@ STATES = {
     234: "Calibration Charge",
     251: "FW Upgrade (DSP)",
     252: "FW Upgrade (ARM)",
-    253: "BMS Upgrading"
+    253: "BMS Upgrading",
 }
 
 LIBBI_MODES = ["Stopped", "Normal", "Export"]
@@ -195,12 +195,18 @@ class Libbi(BaseDevice):
     @property
     def charge_from_grid(self):
         """Is charging from the grid enabled?"""
-        return self._extra_data.get("charge_from_grid")
+        if self._connection.app_email and self._connection.app_password:
+            return self._extra_data.get("charge_from_grid")
+        else:
+            return None
 
     @property
     def charge_target(self):
         """Libbi charge target"""
-        return self._extra_data.get("charge_target", 0) / 1000
+        if self._connection.app_email and self._connection.app_password:
+            return self._extra_data.get("charge_target", 0) / 1000
+        else:
+            return None
 
     @property
     def prefix(self):
@@ -225,12 +231,15 @@ class Libbi(BaseDevice):
 
     async def set_charge_from_grid(self, charge_from_grid: bool):
         """Set charge from grid"""
-        await self._connection.put(
-            f"/api/AccountAccess/LibbiMode?chargeFromGrid={charge_from_grid}&serialNo={self._serialno}",
-            oauth=True,
-        )
-        self._extra_data["charge_from_grid"] = charge_from_grid
-        return True
+        if self._connection.app_email and self._connection.app_password:
+            await self._connection.put(
+                f"/api/AccountAccess/LibbiMode?chargeFromGrid={charge_from_grid}&serialNo={self._serialno}",
+                oauth=True,
+            )
+            self._extra_data["charge_from_grid"] = charge_from_grid
+            return True
+        else:
+            return False
 
     async def set_priority(self, priority):
         """Set device priority"""
@@ -242,12 +251,15 @@ class Libbi(BaseDevice):
 
     async def set_charge_target(self, charge_target: float):
         """Set charge target"""
-        await self._connection.put(
-            f"/api/AccountAccess/{self._serialno}/TargetEnergy?targetEnergy={charge_target}",
-            oauth=True,
-        )
-        self._extra_data["charge_target"] = charge_target
-        return True
+        if self._connection.app_email and self._connection.app_password:
+            await self._connection.put(
+                f"/api/AccountAccess/{self._serialno}/TargetEnergy?targetEnergy={charge_target}",
+                oauth=True,
+            )
+            self._extra_data["charge_target"] = charge_target
+            return True
+        else:
+            return False
 
     def show(self, short_format=False):
         """Returns a string with all data in human readable format"""
@@ -269,11 +281,18 @@ class Libbi(BaseDevice):
         ret = ret + f"Status: {self.status}\n"
         ret = ret + "Local Mode: " + self.get_mode_description(self.local_mode) + "\n"
         ret = ret + "Charge from Grid: "
-        if self.charge_from_grid:
-            ret = ret + "Enabled\n"
+        if self.charge_from_grid is not None:
+            if self.charge_from_grid:
+                ret = ret + "Enabled\n"
+            else:
+                ret = ret + "Disabled\n"
         else:
-            ret = ret + "Disabled\n"
-        ret = ret + f"Charge target: {self.charge_target}kWh\n"
+            ret = ret + f"<unavailable>\n"
+        ret = ret + f"Charge target: "
+        if self.charge_target is not None:
+            ret = ret + f"{self.charge_target}kWh\n"
+        else:
+            ret = ret + f"<unavailable>\n"
         ret = ret + f"CT 1 {self.ct1.name} {self.ct1.power}W phase {self.ct1.phase}\n"
         ret = ret + f"CT 2 {self.ct2.name} {self.ct2.power}W phase {self.ct2.phase}\n"
         ret = ret + f"CT 3 {self.ct3.name} {self.ct3.power}W phase {self.ct3.phase}\n"
