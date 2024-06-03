@@ -14,7 +14,21 @@ PLUG_STATES = {
     "F": "Fault",
     "U": "",
 }
-SINGLE_PHASE = "SINGLE_PHASE"
+PHASES_STATES = {
+    "SINGLE_PHASE" : "1",
+    "THREE_PHASE" : "3",
+    "AUTO" : "auto",
+}
+PHASES_STRINGS = {
+    "1" : "SINGLE_PHASE",
+    "3" : "THREE_PHASE",
+    "auto" : "AUTO",
+}
+PHASE_SETTING = {
+    "1" : 0,
+    "3" : 1,
+    "auto" : 2,
+}
 
 class Zappi(BaseDevice):
     """Zappi Client for myenergi API."""
@@ -249,11 +263,7 @@ class Zappi(BaseDevice):
 
     @property
     def num_phases(self):
-        phases = self._data.get("phaseSetting", 1)
-        if phases == SINGLE_PHASE:
-            return 1
-        else:
-            return 3
+        return PHASES_STATES.get(self._data.get("phaseSetting", "1"), "")
 
     @property
     def update_available(self):
@@ -342,6 +352,17 @@ class Zappi(BaseDevice):
         # Set local data if successful
         self._data["mgl"] = level
         return True
+
+    async def set_phase_setting(self, phase):
+        """Set phase setting, can be set 1/3/auto"""
+        phasesetting_int = PHASE_SETTING.get(phase)
+        await self._connection.get(
+            f"/cgi-zappi-phase-setting-Z{self._serialno}-{phasesetting_int}"
+        )
+        # Set local data if successful
+        self._data["num_phases"] = PHASES_STRINGS.get(phase)
+        return True
+
 
     async def start_boost(self, amount):
         """Start boost"""
