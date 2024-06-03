@@ -83,7 +83,9 @@ class MyenergiClient:
         if zappi_or_eddi_or_libbi is not None:
             for key in energy_keys:
                 if self._history_totals[key] == 0:
-                    self._history_totals[key] = zappi_or_eddi_or_libbi.history_data.get(key, 0)
+                    self._history_totals[key] = zappi_or_eddi_or_libbi.history_data.get(
+                        key, 0
+                    )
             self._history_totals["green"] = self._history_totals.get(
                 "green", 0
             ) + zappi_or_eddi_or_libbi.history_data.get("device_green", 0)
@@ -133,7 +135,10 @@ class MyenergiClient:
             self._totals[VOLTAGE_GRID] = zappi_or_eddi_or_libbi.supply_voltage
         if self._totals.get(CT_GRID, 0) == 0 and zappi_or_eddi_or_libbi is not None:
             self._totals[CT_GRID] = zappi_or_eddi_or_libbi.power_grid
-        if self._totals.get(CT_GENERATION, 0) == 0 and zappi_or_eddi_or_libbi is not None:
+        if (
+            self._totals.get(CT_GENERATION, 0) == 0
+            and zappi_or_eddi_or_libbi is not None
+        ):
             self._totals[CT_GENERATION] = zappi_or_eddi_or_libbi.power_generated
 
     def get_power_totals(self):
@@ -214,8 +219,8 @@ class MyenergiClient:
         for grp in self._data:
             keys = list(grp.keys())
             key = keys[0]
-            if(len(keys) > 1 and keys[1] == 'fwv'):
-                self._firmware_version = grp['fwv']
+            if len(keys) > 1 and keys[1] == "fwv":
+                self._firmware_version = grp["fwv"]
             if key not in DEVICE_TYPES:
                 if key == "fwv":
                     self._firmware_version = grp[key]
@@ -225,7 +230,9 @@ class MyenergiClient:
             devices = grp[key]
             for device_data in devices:
                 serial = device_data.get("sno")
-                self._update_available = device_data.get('newBootloaderAvailable', False)
+                self._update_available = device_data.get(
+                    "newBootloaderAvailable", False
+                )
                 existing_device = self.devices.get(serial, None)
                 if existing_device is None:
                     existing_device = device_factory(
