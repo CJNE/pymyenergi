@@ -13,13 +13,13 @@ from pymyenergi.connection import Connection
 from pymyenergi.eddi import BOOST_TARGETS
 from pymyenergi.eddi import EDDI_MODES
 from pymyenergi.exceptions import WrongCredentials
-from pymyenergi.zappi import CHARGE_MODES
 from pymyenergi.libbi import LIBBI_MODES
+from pymyenergi.zappi import CHARGE_MODES
 
 from . import EDDI
 from . import HARVI
-from . import ZAPPI
 from . import LIBBI
+from . import ZAPPI
 
 logging.basicConfig()
 logging.root.setLevel(logging.WARNING)
@@ -28,11 +28,13 @@ logging.root.setLevel(logging.WARNING)
 async def main(args):
     username = args.username or input("Please enter your hub serial number: ")
     password = args.password or getpass(prompt="Password (apikey): ")
-    app_email = args.app_email or input("App email (enter to skip; only needed for libbi): ")
+    app_email = args.app_email or input(
+        "App email (enter to skip; only needed for libbi): "
+    )
     if app_email:
         app_password = args.app_password or getpass(prompt="App password: ")
     else:
-        app_password = ''
+        app_password = ""
     conn = Connection(username, password, app_password, app_email)
     if app_email and app_password:
         await conn.discoverLocations()

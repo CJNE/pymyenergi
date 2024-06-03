@@ -167,7 +167,8 @@ Currently supported features:
 - Enable/Disable charging from the grid
 - Set charge target (in Wh)
 
-CLI examples:
+
+## CLI examples:
 
 ```bash
 myenergi libbi show

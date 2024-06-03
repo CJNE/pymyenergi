@@ -30,6 +30,7 @@ PHASE_SETTING = {
     "auto" : 2,
 }
 
+
 class Zappi(BaseDevice):
     """Zappi Client for myenergi API."""
 
