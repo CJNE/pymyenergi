@@ -26,6 +26,13 @@ logging.root.setLevel(logging.WARNING)
 
 
 async def main(args):
+    # handle --version first; no need to authenticate for
+    if args.version:
+        ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+        version_file = open(os.path.join(ROOT_DIR, "VERSION"))
+        version = version_file.read().strip()
+        print(version)
+        sys.exit(0)
     username = args.username or input("Please enter your hub serial number: ")
     password = args.password or getpass(prompt="Password (apikey): ")
     if not args.skip_oauth:
@@ -44,12 +51,6 @@ async def main(args):
         logging.root.setLevel(logging.DEBUG)
     client = MyenergiClient(conn)
     try:
-        if args.version:
-            ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-            version_file = open(os.path.join(ROOT_DIR, "VERSION"))
-            version = version_file.read().strip()
-            print(version)
-            sys.exit(0)
         if args.command == "list":
             devices = await client.get_devices(args.kind)
             for device in devices:
