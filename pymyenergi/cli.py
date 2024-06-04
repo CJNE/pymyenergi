@@ -26,7 +26,7 @@ logging.root.setLevel(logging.WARNING)
 
 
 async def main(args):
-    # handle --version first; no need to authenticate for
+    # handle --version first; no need to authenticate for this
     if args.version:
         ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
         version_file = open(os.path.join(ROOT_DIR, "VERSION"))
