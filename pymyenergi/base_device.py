@@ -63,6 +63,7 @@ class BaseDevice(ABC):
         self._serialno = serialno
         self._data = data or {}
         self._name = None
+        self.is_vhub_enabled = self._data.get("isVHubEnabled", False)
         self.ct_groups = {}
         self.refresh_ct_groups()
 
