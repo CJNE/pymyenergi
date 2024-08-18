@@ -77,7 +77,7 @@ class MyenergiClient:
             self._history_totals[key] = 0
         zappi_or_eddi_or_libbi = None
         for device in devices:
-            if device.kind == ZAPPI or device.kind == EDDI or device == LIBBI:
+            if device.is_vhub_enabled:
                 zappi_or_eddi_or_libbi = device
                 break
         if zappi_or_eddi_or_libbi is not None:
