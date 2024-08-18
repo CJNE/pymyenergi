@@ -80,6 +80,11 @@ class MyenergiClient:
             if device.is_vhub_enabled:
                 zappi_or_eddi_or_libbi = device
                 break
+        if zappi_or_eddi_or_libbi is None:
+            for device in devices:
+                if device.kind == ZAPPI or device.kind == EDDI or device == LIBBI:
+                    zappi_or_eddi_or_libbi = device
+                    break
         if zappi_or_eddi_or_libbi is not None:
             for key in energy_keys:
                 if self._history_totals[key] == 0:
@@ -309,16 +314,30 @@ class MyenergiClient:
         out = out + f"Power battery                : {self.power_battery}W\n"
         out = out + f"Grid voltage                 : {self.voltage_grid}V\n"
         out = out + f"Grid frequency               : {self.frequency_grid}Hz\n"
-        out = out + f"Energy imported              : {self.energy_imported}kWh\n"
-        out = out + f"Energy exported              : {self.energy_exported}kWh\n"
-        out = out + f"Energy generated             : {self.energy_generated}kWh\n"
-        out = out + f"Energy green                 : {self.energy_green}kWh\n"
+        out = out + "\nToday\n"
+        out = (
+            out
+            + f"Energy imported              : {self._history_totals['grid_import']}kWh\n"
+        )
+        out = (
+            out
+            + f"Energy exported              : {self._history_totals['grid_export']}kWh\n"
+        )
+        out = (
+            out
+            + f"Energy generated             : {self._history_totals['generated']}kWh\n"
+        )
+        out = (
+            out + f"Energy green                 : {self._history_totals['green']}kWh\n"
+        )
         out = out + "\n"
         out = out + f"Hub serial number            : {self.serial_number}\n"
         out = out + f"Hub firmware version         : {self.firmware_version}\n"
         out = out + "Devices:\n"
         for device in devices:
             out = out + f"\t{device.kind.capitalize()}: {device.name}"
+            if device.is_vhub_enabled:
+                out = out + " (vhub)"
             if device.kind != HARVI:
                 out = out + f"\t{device.energy_total}kWh today\n"
                 for key in device.ct_keys:
