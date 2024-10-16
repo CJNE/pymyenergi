@@ -19,7 +19,6 @@ _USER_POOL_ID = "eu-west-2_E57cCJB20"
 _CLIENT_ID = "2fup0dhufn5vurmprjkj599041"
 
 
-
 class Connection:
     """Connection to myenergi API."""
 
@@ -30,11 +29,13 @@ class Connection:
         app_password: Text = None,
         app_email: Text = None,
         timeout: int = 20,
+        asyncClient=httpx.AsyncClient(),
     ) -> None:
         """Initialize connection object."""
         self.timeout = timeout
         self.director_url = "https://director.myenergi.net"
         self.base_url = None
+        self.asyncClient = asyncClient
         self.oauth_base_url = "https://myaccount.myenergi.com"
         self.username = username
         self.password = password
@@ -66,8 +67,10 @@ class Connection:
         if self.app_email and self.app_password:
             locs = await self.get("/api/Location", oauth=True)
             # check if guest location - use the first location by default
-            if locs["content"][0]["isGuestLocation"] == True:
-                self.invitation_id = locs["content"][0]["invitationData"]["invitationId"]
+            if locs["content"][0]["isGuestLocation"]:
+                self.invitation_id = locs["content"][0]["invitationData"][
+                    "invitationId"
+                ]
 
     def checkAndUpdateToken(self):
         # check if we have oauth credentials
@@ -81,66 +84,78 @@ class Connection:
         if oauth:
             # check if we have oauth credentials
             if self.app_email and self.app_password:
-                async with httpx.AsyncClient(
-                    headers=self.oauth_headers, timeout=self.timeout
-                ) as httpclient:
-                    theUrl = self.oauth_base_url + url
-                    # if we have an invitiation id, we need to add that to the query
-                    if self.invitation_id != "":
-                        if "?" in theUrl:
-                            theUrl = theUrl + "&invitationId=" + self.invitation_id
-                        else:
-                            theUrl = theUrl + "?invitationId=" + self.invitation_id
-                    try:
-                        _LOGGER.debug(f"{method} {url} {theUrl}")
-                        response = await httpclient.request(method, theUrl, json=json)
-                    except httpx.ReadTimeout:
-                        raise TimeoutException()
+                theUrl = self.oauth_base_url + url
+                # if we have an invitiation id, we need to add that to the query
+                if self.invitation_id != "":
+                    if "?" in theUrl:
+                        theUrl = theUrl + "&invitationId=" + self.invitation_id
                     else:
-                        _LOGGER.debug(f"{method} status {response.status_code}")
-                        if response.status_code == 200:
-                            return response.json()
-                        elif response.status_code == 401:
-                            raise WrongCredentials()
-                        raise MyenergiException(response.status_code)
+                        theUrl = theUrl + "?invitationId=" + self.invitation_id
+                try:
+                    _LOGGER.debug(f"{method} {url} {theUrl}")
+                    response = await self.asyncClient.request(
+                        method,
+                        theUrl,
+                        json=json,
+                        headers=self.oauth_headers,
+                        timeout=self.timeout,
+                    )
+                except httpx.ReadTimeout:
+                    raise TimeoutException()
+                else:
+                    _LOGGER.debug(f"{method} status {response.status_code}")
+                    if response.status_code == 200:
+                        return response.json()
+                    elif response.status_code == 401:
+                        raise WrongCredentials()
+                    raise MyenergiException(response.status_code)
             else:
                 _LOGGER.error("Trying to use OAuth without app credentials")
 
         # Use Digest Auth for director.myenergi.net and s18.myenergi.net
         else:
             # If base URL has not been set, make a request to director to fetch it
-            async with httpx.AsyncClient(
-                auth=self.auth, headers=self.headers, timeout=self.timeout
-            ) as httpclient:
-                if self.base_url is None or self.do_query_asn:
-                    _LOGGER.debug("Get Myenergi base url from director")
-                    try:
-                        directorUrl = self.director_url + "/cgi-jstatus-E"
-                        response = await httpclient.get(directorUrl)
-                    except Exception:
-                        _LOGGER.error("Myenergi server request problem")
-                        _LOGGER.debug(sys.exc_info()[0])
-                    else:
-                        self.do_query_asn = False
-                        self._checkMyenergiServerURL(response.headers)
-                theUrl = self.base_url + url
+            if self.base_url is None or self.do_query_asn:
+                _LOGGER.debug("Get Myenergi base url from director")
                 try:
-                    _LOGGER.debug(f"{method} {url} {theUrl}")
-                    response = await httpclient.request(method, theUrl, json=json)
-                except httpx.ReadTimeout:
-                    # Make sure to query for ASN next request, might be a server problem
-                    self.do_query_asn = True
-                    raise TimeoutException()
+                    directorUrl = self.director_url + "/cgi-jstatus-E"
+                    response = await self.asyncClient.get(
+                        directorUrl,
+                        auth=self.auth,
+                        headers=self.headers,
+                        timeout=self.timeout,
+                    )
+                except Exception:
+                    _LOGGER.error("Myenergi server request problem")
+                    _LOGGER.debug(sys.exc_info()[0])
                 else:
-                    _LOGGER.debug(f"GET status {response.status_code}")
+                    self.do_query_asn = False
                     self._checkMyenergiServerURL(response.headers)
-                    if response.status_code == 200:
-                        return response.json()
-                    elif response.status_code == 401:
-                        raise WrongCredentials()
-                    # Make sure to query for ASN next request, might be a server problem
-                    self.do_query_asn = True
-                    raise MyenergiException(response.status_code)
+            theUrl = self.base_url + url
+            try:
+                _LOGGER.debug(f"{method} {url} {theUrl}")
+                response = await self.asyncClient.request(
+                    method,
+                    theUrl,
+                    auth=self.auth,
+                    headers=self.headers,
+                    timeout=self.timeout,
+                    json=json,
+                )
+            except httpx.ReadTimeout:
+                # Make sure to query for ASN next request, might be a server problem
+                self.do_query_asn = True
+                raise TimeoutException()
+            else:
+                _LOGGER.debug(f"GET status {response.status_code}")
+                self._checkMyenergiServerURL(response.headers)
+                if response.status_code == 200:
+                    return response.json()
+                elif response.status_code == 401:
+                    raise WrongCredentials()
+                # Make sure to query for ASN next request, might be a server problem
+                self.do_query_asn = True
+                raise MyenergiException(response.status_code)
 
     async def get(self, url, data=None, oauth=False):
         return await self.send("GET", url, data, oauth)
