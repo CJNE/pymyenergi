@@ -5,7 +5,7 @@ from pymyenergi.zappi import Zappi
 pytestmark = pytest.mark.asyncio
 
 
-async def test_refresh(zappi_fetch_data_fixture):
+async def test_refresh(zappi_fetch_data_fixture, zappi_fetch_boost_data_fixture):
     """Test Zappi data"""
     zappi = Zappi({}, 16042300)
     await zappi.refresh()

@@ -52,7 +52,18 @@ def client_1p_zappi_harvi_solar_battery_fixture():
 def zappi_fetch_data_fixture():
     """Mock data from client.fetch_data()"""
     with patch(
-        "pymyenergi.zappi.Zappi.fetch_data", return_value=load_fixture_json("zappi")
+        "pymyenergi.zappi.Zappi.fetch_data",
+        return_value=load_fixture_json("zappi"),
+    ):
+        yield
+
+
+@pytest.fixture(name="zappi_fetch_boost_data_fixture")
+def zappi_fetch_boost_data_fixture():
+    """Mock data from client.fetch_data()"""
+    with patch(
+        "pymyenergi.zappi.Zappi.fetch_boost_data",
+        return_value=load_fixture_json("zappi"),
     ):
         yield
 

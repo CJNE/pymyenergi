@@ -1,3 +1,5 @@
+from unittest.mock import MagicMock
+
 import pytest
 
 from pymyenergi.client import MyenergiClient
@@ -9,7 +11,38 @@ from pymyenergi.zappi import Zappi
 # All test coroutines will be treated as marked.
 pytestmark = pytest.mark.asyncio
 
-conn = {}
+
+class MockConnection:
+    """Connection to myenergi API."""
+
+    def __init__(self, app_password, app_email) -> None:
+        """Initialize connection object."""
+        self.app_password = app_password
+        self.app_email = app_email
+
+    async def discoverLocations(self):
+        return
+
+    def checkAndUpdateToken(self):
+        return
+
+    async def send(self, method, url, json=None, oauth=False):
+        return MagicMock()
+
+    async def get(self, url, data=None, oauth=False):
+        return await self.send("GET", url, data, oauth)
+
+    async def post(self, url, data=None, oauth=False):
+        return await self.send("POST", url, data, oauth)
+
+    async def put(self, url, data=None, oauth=False):
+        return await self.send("PUT", url, data, oauth)
+
+    async def delete(self, url, data=None, oauth=False):
+        return await self.send("DELETE", url, data, oauth)
+
+
+conn = MockConnection("test@test.com", "1234")
 
 
 async def test_init(bypass_client_fetch_data):
