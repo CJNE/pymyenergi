@@ -287,12 +287,12 @@ class Libbi(BaseDevice):
             else:
                 ret = ret + "Disabled\n"
         else:
-            ret = ret + f"<unavailable>\n"
-        ret = ret + f"Charge target: "
+            ret = ret + "<unavailable>\n"
+        ret = ret + "Charge target: "
         if self.charge_target is not None:
             ret = ret + f"{self.charge_target}kWh\n"
         else:
-            ret = ret + f"<unavailable>\n"
+            ret = ret + "<unavailable>\n"
         ret = ret + f"CT 1 {self.ct1.name} {self.ct1.power}W phase {self.ct1.phase}\n"
         ret = ret + f"CT 2 {self.ct2.name} {self.ct2.power}W phase {self.ct2.phase}\n"
         ret = ret + f"CT 3 {self.ct3.name} {self.ct3.power}W phase {self.ct3.phase}\n"
