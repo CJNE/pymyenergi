@@ -1,6 +1,7 @@
 from unittest.mock import AsyncMock
 
 import pytest
+
 from pymyenergi.eddi import Eddi
 
 pytestmark = pytest.mark.asyncio

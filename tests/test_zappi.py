@@ -1,4 +1,5 @@
 import pytest
+
 from pymyenergi.zappi import Zappi
 
 pytestmark = pytest.mark.asyncio

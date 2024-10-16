@@ -1,4 +1,5 @@
 """Global fixtures"""
+
 import json
 from unittest.mock import patch
 

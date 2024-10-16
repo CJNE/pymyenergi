@@ -167,7 +167,6 @@ Currently supported features:
 - Enable/Disable charging from the grid
 - Set charge target (in Wh)
 
-
 ## CLI examples:
 
 ```bash

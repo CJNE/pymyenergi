@@ -1,4 +1,5 @@
 import pytest
+
 from pymyenergi.libbi import Libbi
 
 pytestmark = pytest.mark.asyncio

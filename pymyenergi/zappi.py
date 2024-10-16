@@ -15,21 +15,20 @@ PLUG_STATES = {
     "U": "",
 }
 PHASES_STATES = {
-    "SINGLE_PHASE" : "1",
-    "THREE_PHASE" : "3",
-    "AUTO" : "auto",
+    "SINGLE_PHASE": "1",
+    "THREE_PHASE": "3",
+    "AUTO": "auto",
 }
 PHASES_STRINGS = {
-    "1" : "SINGLE_PHASE",
-    "3" : "THREE_PHASE",
-    "auto" : "AUTO",
+    "1": "SINGLE_PHASE",
+    "3": "THREE_PHASE",
+    "auto": "AUTO",
 }
 PHASE_SETTING = {
-    "1" : 0,
-    "3" : 1,
-    "auto" : 2,
+    "1": 0,
+    "3": 1,
+    "auto": 2,
 }
-
 
 
 class Zappi(BaseDevice):
@@ -365,7 +364,6 @@ class Zappi(BaseDevice):
         # Set local data if successful
         self._data["num_phases"] = PHASES_STRINGS.get(phase)
         return True
-
 
     async def start_boost(self, amount):
         """Start boost"""

@@ -1,4 +1,5 @@
 import pytest
+
 from pymyenergi.harvi import Harvi
 
 pytestmark = pytest.mark.asyncio

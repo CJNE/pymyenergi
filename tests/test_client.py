@@ -1,4 +1,5 @@
 import pytest
+
 from pymyenergi.client import MyenergiClient
 from pymyenergi.eddi import Eddi
 from pymyenergi.harvi import Harvi
