@@ -19,7 +19,6 @@ STATES = {
     55: "Boosting",
     104: "Full",
     253: "BMS Upgrading",
-
     # fault codes from user operating instructions
     58: "Generation CT Polarity",
     101: "Battery Empty",
@@ -77,7 +76,7 @@ STATES = {
     233: "SoC Recovery",
     234: "Calibration Charge",
     251: "Upgrading DSP",
-    252: "Upgrading ARM"
+    252: "Upgrading ARM",
 }
 
 LIBBI_MODES = ["Stopped", "Normal", "Export"]
