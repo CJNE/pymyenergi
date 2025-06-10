@@ -181,9 +181,14 @@ class Eddi(BaseDevice):
     async def manual_boost(self, target: str, time: int):
         """Start manual boost of target for time minutes"""
         target_int = BOOST_TARGETS[target.lower().replace(" ", "")]
-        await self._connection.get(
-            f"/cgi-eddi-boost-E{self._serialno}-10-{target_int}-{time}"
-        )
+        if int(float(time)) < 1:
+            await self._connection.get(
+                f"/cgi-eddi-boost-E{self._serialno}-1-{target_int}-{time}"
+            )
+        else:
+            await self._connection.get(
+                f"/cgi-eddi-boost-E{self._serialno}-10-{target_int}-{time}"
+            )
         return True
 
     async def set_priority(self, priority):
