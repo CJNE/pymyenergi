@@ -20,7 +20,7 @@ jobs:
     name: Pre-commit
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v6.0.0
       - name: Set up Python ${{ env.DEFAULT_PYTHON }}
         uses: actions/setup-python@v5.3.0
         with:
@@ -48,7 +48,7 @@ jobs:
         python-version: ["3.9", "3.12", "3.13"]
     steps:
       - name: Check out code from GitHub
-        uses: "actions/checkout@v4.2.2"
+        uses: "actions/checkout@v6.0.0"
       - name: Setup Python ${{ matrix.python-version }}
         uses: "actions/setup-python@v5.3.0"
         with:
