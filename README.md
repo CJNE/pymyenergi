@@ -158,14 +158,15 @@ loop.run_until_complete(get_data())
 
 ## Libbi support
 
-Currently supported features:
+Supported features:
 
-- Reads a few values such as State of Charge, DCPV CT
+- Read values such as State of Charge, CT readings, inverter/battery size
 - Battery in and out energy
-- Gets and sets the current operating mode (normal/stopped/export)
+- Get and set the current operating mode (normal/stopped/export)
 - Change priority of Libbi
-- Enable/Disable charging from the grid
+- Enable/disable charging from the grid
 - Set charge target (in Wh)
+- Get and set the tariff
 
 ## CLI examples:
 
@@ -176,7 +177,79 @@ myenergi libbi priority 1
 myenergi libbi energy
 myenergi libbi chargefromgrid false
 myenergi libbi chargetarget 10200
+myenergi libbi gettariff
+myenergi libbi settariff 
 ```
+
+Tariff specification
+
+* ```days``` is an array with 0 being Sunday, 1 is Monday and so on.
+* ```default_price``` is optional. If specified any timeslot not explicitly defined will have a default price. If not specified, the timeslot definitions have to cover the whole day.
+* ```bands``` is a list of bands with a ```from``` and ```to``` time (expressed as minutes since midnight) and a ```price```. Each timeslot is 30 minutes long and the ```from``` and ```to``` fields have to fall exactly on 30 minute boundaries (e.g 0, 30, 60, 90, etc).
+
+Simple tariff with a cheap interval between 02:00 and 05:00
+```json
+[
+  {
+    "days": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "default_price": 15,
+    "bands": [
+      {
+        "from": 120,
+        "to": 300,
+        "price": 1
+      }
+    ]
+  }
+]
+```
+
+More advanced tariff with separate settings for Saturday and Sunday.
+On weekdays, the cheap period is between 02:00 and 05:00. On Sat/Sun it's 00:00 to 05:00.
+```json
+[
+  {
+    "days": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "default_price": 15,
+    "bands": [
+      {
+        "from": 120,
+        "to": 300,
+        "price": 1
+      }
+    ]
+  },
+  {
+    "days": [
+      0,
+      6
+    ],
+    "default_price": 15,
+    "bands": [
+      {
+        "from": 0,
+        "to": 420,
+        "price": 1
+      }
+    ]
+  }
+]
+```
+
 
 ## Credits
 

@@ -262,7 +262,7 @@ class MyenergiClient:
 
                 # Update the extra information available on libbi
                 # this is the bit that requires OAuth
-                if existing_device.kind == LIBBI:
+                if existing_device.kind == LIBBI and isinstance(existing_device, Libbi):
                     await existing_device.refresh_extra()
         self._calculate_totals()
 
@@ -310,7 +310,7 @@ class MyenergiClient:
         out = out + f"Home consumption             : {self.consumption_home}W\n"
         out = out + f"Power grid                   : {self.power_grid}W\n"
         out = out + f"Power generation             : {self.power_generation}W\n"
-        out = out + f"Power EV charge              : {self.power_charging}W\n"
+        out = out + f"Power EV/Libbi charge        : {self.power_charging}W\n"
         out = out + f"Power battery                : {self.power_battery}W\n"
         out = out + f"Grid voltage                 : {self.voltage_grid}V\n"
         out = out + f"Grid frequency               : {self.frequency_grid}Hz\n"
