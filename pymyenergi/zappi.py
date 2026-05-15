@@ -1,6 +1,6 @@
 from pymyenergi.connection import Connection
 
-from . import ZAPPI
+from . import CT_LOAD, ZAPPI
 from .base_device import BaseDevice
 
 CHARGE_MODES = ["None", "Fast", "Eco", "Eco+", "Stopped"]
@@ -125,6 +125,15 @@ class Zappi(BaseDevice):
     def power_generated(self):
         """Generated power in W"""
         return self._data.get("gen", 0)
+
+    @property
+    def power_charging(self):
+        """Charging power in W"""
+        total = 0
+        for ct in [self.ct1, self.ct2, self.ct3, self.ct4, self.ct5, self.ct6]:
+            if ct.is_assigned and ct.name == CT_LOAD:
+                total += ct.power
+        return total
 
     @property
     def status(self):
