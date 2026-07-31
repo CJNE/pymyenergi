@@ -129,6 +129,11 @@ async def main(args):
                         print(f"Start boosting with {args.arg[0]}kWh")
                     else:
                         print("Could not start boost, charge mode must be Eco or Eco+")
+                elif args.action == "cancel-delay" and args.command == ZAPPI:
+                    if await device.cancel_smartregs_charge_delay():
+                        print(f"Cancelled smart regs delay")
+                    else:
+                        print("Could not cancel smart regs delay")
                 elif args.action == "boost" and args.command == EDDI:
                     if len(args.arg) < 2 or args.arg[0] not in BOOST_TARGETS:
                         targets = ", ".join(BOOST_TARGETS)
@@ -228,6 +233,7 @@ def cli():
             "mingreen",
             "priority",
             "unlock",
+            "cancel-delay",
         ],
     )
     subparser_zappi.add_argument("arg", nargs="*")

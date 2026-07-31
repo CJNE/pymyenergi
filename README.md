@@ -151,6 +151,8 @@ async def get_data() -> None:
     print()
     # print(f"      Boost start at {zappi.boost_start_hour}:{zappi.boost_start_minute} add {zappi.boost_amount}kWh")
     print(f"Smart Boost start at {zappi.smart_boost_start_hour}:{zappi.smart_boost_start_minute} add {zappi.smart_boost_amount}kWh")
+    print(f"Charge delay state is: {zappi.smartregs_charge_delay}")
+    print(f"Is the device being tampered with: {zappi.being_tampered_with}")
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(get_data())
