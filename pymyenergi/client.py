@@ -262,7 +262,7 @@ class MyenergiClient:
 
                 # Update the extra information available on libbi
                 # this is the bit that requires OAuth
-                if existing_device.kind == LIBBI:
+                if existing_device.kind in (LIBBI, ZAPPI):
                     await existing_device.refresh_extra()
         self._calculate_totals()
 

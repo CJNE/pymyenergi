@@ -29,6 +29,9 @@ class MockConnection:
     async def send(self, method, url, json=None, oauth=False):
         return MagicMock()
 
+    async def trpc_get(self, procedure, payload):
+        return {"config": {}}
+
     async def get(self, url, data=None, oauth=False):
         return await self.send("GET", url, data, oauth)
 

@@ -3,6 +3,8 @@
 Python Package for connecting to myenergi API.
 
 """
+
+import json as jsonlib
 import logging
 import sys
 from typing import Text
@@ -37,6 +39,7 @@ class Connection:
         self.base_url = None
         self.asyncClient = asyncClient
         self.oauth_base_url = "https://myaccount.myenergi.com"
+        self.trpc_base_url = "https://app-api.s18.myenergi.net"
         self.username = username
         self.password = password
         self.app_password = app_password
@@ -156,6 +159,42 @@ class Connection:
                 # Make sure to query for ASN next request, might be a server problem
                 self.do_query_asn = True
                 raise MyenergiException(response.status_code)
+
+    async def _trpc(self, method, procedure, payload):
+        """Call a procedure on the myenergi app tRPC backend (requires OAuth)"""
+        if not (self.app_email and self.app_password):
+            _LOGGER.error("Trying to use the app API without app credentials")
+            return None
+        self.checkAndUpdateToken()
+        url = f"{self.trpc_base_url}/{procedure}"
+        kwargs = {}
+        if method == "GET":
+            # compact separators: the server does not decode "+" as a space
+            kwargs["params"] = {"input": jsonlib.dumps(payload, separators=(",", ":"))}
+        else:
+            kwargs["json"] = payload
+        try:
+            response = await self.asyncClient.request(
+                method,
+                url,
+                headers=self.oauth_headers,
+                timeout=self.timeout,
+                **kwargs,
+            )
+        except httpx.ReadTimeout:
+            raise TimeoutException()
+        _LOGGER.debug(f"{method} {url} status {response.status_code}")
+        if response.status_code == 200:
+            return response.json()["result"]["data"]
+        elif response.status_code == 401:
+            raise WrongCredentials()
+        raise MyenergiException(response.status_code)
+
+    async def trpc_get(self, procedure, payload):
+        return await self._trpc("GET", procedure, payload)
+
+    async def trpc_post(self, procedure, payload):
+        return await self._trpc("POST", procedure, payload)
 
     async def get(self, url, data=None, oauth=False):
         return await self.send("GET", url, data, oauth)

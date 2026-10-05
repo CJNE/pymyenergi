@@ -37,7 +37,7 @@ async def main(args):
     password = args.password or getpass(prompt="Password (apikey): ")
     if not args.skip_oauth:
         app_email = args.app_email or input(
-            "App email (enter to skip; only needed for libbi): "
+            "App email (enter to skip; only needed for libbi and zappi export margin): "
         )
         if app_email:
             app_password = args.app_password or getpass(prompt="App password: ")
@@ -69,6 +69,8 @@ async def main(args):
             else:
                 devices = [device_factory(conn, args.command, args.serial)]
                 await devices[0].refresh()
+                if args.command == ZAPPI and args.action == "show" and not args.json:
+                    await devices[0].refresh_extra()
             for device in devices:
                 if args.action == "show":
                     if args.json:
@@ -124,6 +126,18 @@ async def main(args):
                         sys.exit("A minimum green level must be provided")
                     await device.set_minimum_green_level(args.arg[0])
                     print(f"Minimum green level was set to {args.arg[0]}")
+                elif args.action == "exportmargin" and args.command == ZAPPI:
+                    if len(args.arg) < 1 or not args.arg[0].isnumeric():
+                        sys.exit("The export margin must be specified in W")
+                    try:
+                        ok = await device.set_export_margin(args.arg[0])
+                    except ValueError as e:
+                        sys.exit(str(e))
+                    if not ok:
+                        sys.exit(
+                            "App credentials are required to set the export margin"
+                        )
+                    print(f"Export margin was set to {args.arg[0]}W")
                 elif args.action == "boost" and args.command == ZAPPI:
                     if await device.start_boost(args.arg[0]):
                         print(f"Start boosting with {args.arg[0]}kWh")
@@ -226,6 +240,7 @@ def cli():
             "boost",
             "smart-boost",
             "mingreen",
+            "exportmargin",
             "priority",
             "unlock",
         ],

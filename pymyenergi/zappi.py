@@ -1,7 +1,12 @@
+import logging
+
 from pymyenergi.connection import Connection
+from pymyenergi.exceptions import MyenergiException
 
 from . import ZAPPI
 from .base_device import BaseDevice
+
+_LOGGER = logging.getLogger(__name__)
 
 CHARGE_MODES = ["None", "Fast", "Eco", "Eco+", "Stopped"]
 STATES = ["Unkn0", "Paused", "Unkn2", "Charging", "Boosting", "Completed"]
@@ -37,12 +42,26 @@ class Zappi(BaseDevice):
     def __init__(self, connection: Connection, serialno, data=None) -> None:
         self.history_data = {}
         self.boost_data = {}
+        self._extra_data = {}
         super().__init__(connection, serialno, data)
 
     async def refresh(self):
         """Refresh device data"""
         self.data = await self.fetch_data()
         self.boost_data = await self.fetch_boost_data()
+
+    async def refresh_extra(self):
+        """Fetch app-only settings, requires app credentials"""
+        if self._connection.app_email and self._connection.app_password:
+            try:
+                settings = await self._connection.trpc_get(
+                    "device.userDeviceSettings.getSettings",
+                    {"deviceSerialNo": str(self._serialno)},
+                )
+            except MyenergiException as e:
+                _LOGGER.warning(f"Could not fetch Zappi app settings: {e}")
+                return
+            self._extra_data = (settings or {}).get("config") or {}
 
     async def fetch_boost_data(self):
         """Fetch data from myenergi"""
@@ -170,6 +189,13 @@ class Zappi(BaseDevice):
     def charge_session_allowed(self):
         """Allow charge override"""
         return self._data.get("lck", 0) >> 5 & 1 == 1
+
+    @property
+    def export_margin(self):
+        """Export margin in W, None unless app credentials are provided"""
+        if self._connection.app_email and self._connection.app_password:
+            return self._extra_data.get("exportMargin")
+        return None
 
     @property
     def minimum_green_level(self):
@@ -325,7 +351,11 @@ class Zappi(BaseDevice):
         ret = ret + "Smart Boost start at"
         ret = ret + f" {self.smart_boost_start_hour}:{self.smart_boost_start_minute}"
         ret = ret + f" add {self.smart_boost_amount}kWh\n"
-        ret = ret + f"Minimum green level: {self.minimum_green_level}%"
+        ret = ret + f"Minimum green level: {self.minimum_green_level}%\n"
+        if self.export_margin is not None:
+            ret = ret + f"Export margin: {self.export_margin}W"
+        else:
+            ret = ret + "Export margin: <unavailable>"
         return ret
 
     async def stop_charge(self):
@@ -353,6 +383,20 @@ class Zappi(BaseDevice):
         await self._connection.get(f"/cgi-set-min-green-Z{self._serialno}-{level}")
         # Set local data if successful
         self._data["mgl"] = level
+        return True
+
+    async def set_export_margin(self, margin):
+        """Set export margin in W, 0-10000 in steps of 50. Requires app credentials"""
+        margin = int(margin)
+        if margin < 0 or margin > 10000 or margin % 50 != 0:
+            raise ValueError("Export margin must be 0-10000 W in steps of 50")
+        if not (self._connection.app_email and self._connection.app_password):
+            return False
+        await self._connection.trpc_post(
+            "device.userDeviceSettings.setSettings",
+            {"deviceSerialNo": str(self._serialno), "config": {"exportMargin": margin}},
+        )
+        self._extra_data["exportMargin"] = margin
         return True
 
     async def set_phase_setting(self, phase):

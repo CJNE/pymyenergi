@@ -156,6 +156,22 @@ loop = asyncio.get_event_loop()
 loop.run_until_complete(get_data())
 ```
 
+## Zappi export margin
+
+The Zappi export margin is read and changed through the myenergi app API, so it requires `app_email` and `app_password`. Without them `export_margin` is `None` and `set_export_margin` returns `False`.
+
+```python
+conn = Connection(hub_serial, api_key, app_email=email, app_password=password)
+zappi = Zappi(conn, zappi_serial)
+await zappi.refresh_extra()
+print(zappi.export_margin)
+await zappi.set_export_margin(100)
+```
+
+```bash
+myenergi zappi exportmargin 100
+```
+
 ## Libbi support
 
 Currently supported features:
