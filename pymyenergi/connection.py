@@ -4,7 +4,6 @@ Python Package for connecting to myenergi API.
 
 """
 import logging
-import sys
 from typing import Text
 
 import httpx
@@ -126,8 +125,8 @@ class Connection:
                         timeout=self.timeout,
                     )
                 except Exception:
-                    _LOGGER.error("Myenergi server request problem")
-                    _LOGGER.debug(sys.exc_info()[0])
+                    _LOGGER.exception("Myenergi server request problem")
+                    raise
                 else:
                     self.do_query_asn = False
                     self._checkMyenergiServerURL(response.headers)

@@ -82,7 +82,7 @@ class MyenergiClient:
                 break
         if zappi_or_eddi_or_libbi is None:
             for device in devices:
-                if device.kind == ZAPPI or device.kind == EDDI or device == LIBBI:
+                if device.kind == ZAPPI or device.kind == EDDI or device.kind == LIBBI:
                     zappi_or_eddi_or_libbi = device
                     break
         if zappi_or_eddi_or_libbi is not None:
