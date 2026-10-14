@@ -331,6 +331,7 @@ class Zappi(BaseDevice):
     async def stop_charge(self):
         """Stop charge"""
         await self._connection.get(f"/cgi-zappi-mode-Z{self._serialno}-4-0-0-0000")
+        self._data["zmo"] = 4
         return True
 
     async def stop_boost(self):
@@ -357,12 +358,14 @@ class Zappi(BaseDevice):
 
     async def set_phase_setting(self, phase):
         """Set phase setting, can be set 1/3/auto"""
-        phasesetting_int = PHASE_SETTING.get(phase)
+        if not isinstance(phase, str) or phase not in PHASE_SETTING:
+            raise ValueError("Phase must be one of: 1, 3, auto")
+        phasesetting_int = PHASE_SETTING[phase]
         await self._connection.get(
             f"/cgi-zappi-phase-setting-Z{self._serialno}-{phasesetting_int}"
         )
         # Set local data if successful
-        self._data["num_phases"] = PHASES_STRINGS.get(phase)
+        self._data["phaseSetting"] = PHASES_STRINGS[phase]
         return True
 
     async def start_boost(self, amount):
